@@ -5,7 +5,8 @@
 
 struct Enemies //"Object pool" test struct
 {
-	Enemies() { HP = 10; damage = 0; timeToLive = rand() % 20; };
+	Enemies() { };
+	void Init() { HP = 10; damage = 0; timeToLive = rand() % 20; };
 	void Tick() { timeToLive--; };
 	bool Alive() { return timeToLive; };
 	int HP;
