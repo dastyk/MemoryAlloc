@@ -122,7 +122,33 @@ void TestCaseC::TestPoolAllocator()
 	}
 	testCasePoolTime += timer.Elapsed().count();
 
-	std::cout << std::fixed << testCaseNaiveTime << "ms" <<  std::endl << testCasePoolTime << "ms" << std::endl;
+	std::cout << std::fixed << "Naive Test Case Random operations: " << testCaseNaiveTime << " ms" <<  std::endl << "Pool Test Case Random operations: " << testCasePoolTime << " ms" << std::endl;
+
+	timer.Reset();
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		testCase[i] = new Enemies();
+		testCase[i]->Init();
+	}
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		delete testCase[i];
+	}
+	testCaseNaiveTime = timer.Elapsed().count();
+
+	timer.Reset();
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		testCase[i] = (Enemies*)a.Malloc();
+		testCase[i]->Init();
+	}
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		a.Free(testCase[i]);
+	}
+	testCasePoolTime = timer.Elapsed().count();
+
+	std::cout << std::fixed << "Naive Test Case Performance: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance: " << testCasePoolTime << " ms" << std::endl;
 }
 
 void TestCaseC::TestStackAllocator()
