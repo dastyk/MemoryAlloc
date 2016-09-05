@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PoolAllocator.h" />
+    <ClInclude Include="TestStructs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

@@ -18,6 +18,9 @@
     <ClInclude Include="PoolAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PoolAllocator.cpp">
