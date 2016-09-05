@@ -9,6 +9,9 @@ public:
 	inline void Free(void*);
 
 private:
+	void _SetupFreeBlocks();
+
+private:
 	void* _pool;
 	void* _free;
 	size_t _numBlocks;
