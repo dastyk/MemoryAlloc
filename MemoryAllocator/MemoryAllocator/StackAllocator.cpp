@@ -31,6 +31,11 @@ void StackAllocator::FreeToMarker(size_t marker)
 	_marker = marker;
 }
 
+void StackAllocator::Reset()
+{
+	_marker = 0;
+}
+
 size_t StackAllocator::GetMarker()
 {
 	return _marker;

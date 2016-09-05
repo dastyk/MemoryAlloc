@@ -9,6 +9,7 @@ public:
 
 	void* Alloc(size_t size);
 	void FreeToMarker(size_t marker);
+	void Reset();
 	size_t GetMarker();
 private:
 	size_t _stackSize;
