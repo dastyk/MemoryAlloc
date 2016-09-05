@@ -20,11 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PoolAllocator.h" />
+    <ClInclude Include="TestCaseController.h" />
     <ClInclude Include="TestStructs.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PoolAllocator.cpp" />
+    <ClCompile Include="TestCaseController.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9F72AA3A-80E6-4D4D-8B95-F28854D85EC2}</ProjectGuid>
