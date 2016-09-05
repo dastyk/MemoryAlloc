@@ -1,4 +1,5 @@
-#pragma once
+#ifndef POOL_ALLOCATOR_H
+#define POOL_ALLOCATOR_H
 class PoolAllocator
 {
 public:
@@ -6,3 +7,4 @@ public:
 	~PoolAllocator();
 };
 
+#endif //POOL_ALLOCATOR_H
