@@ -1,6 +1,5 @@
 #include "PoolAllocator.h"
-#include <memory>
-#include <stdexcept>
+
 
 PoolAllocator::PoolAllocator(size_t blocksize, size_t numBlocks) : _blockSize(blocksize), _numBlocks(numBlocks)
 {
@@ -15,22 +14,6 @@ PoolAllocator::~PoolAllocator()
 	operator delete(_pool);
 }
 
-inline void * PoolAllocator::Malloc()
-{
-	if (!_free) throw std::runtime_error("No more memory.");
-
-	void* ret = _free; // Make copy for return.
-	memcpy(&_free, _free, sizeof(void*)); // Copy the value that _free points to, to the variable _free.
-	return ret;
-}
-
-inline void PoolAllocator::Free(void * p)
-{
-	if (!p) throw std::runtime_error("Free on nullptr");
-	void* prev = _free; // Make copy of previous free block.
-	memcpy(&_free, p, sizeof(void*)); // Free the given block and set it as next free block.
-	memcpy(_free, &prev, sizeof(void*)); // Set the previous next free block as the next next free block.
-}
 
 void PoolAllocator::_SetupFreeBlocks()
 {
