@@ -24,12 +24,8 @@ void PoolAllocator::_SetupFreeBlocks()
 	for (size_t i = 0; i < _numBlocks-1; ++i)
 	{
 		((List*)p)->next = p + _blockSize;		
-		//char* nextPointer = p + _blockSize;
-		//memcpy(p, &nextPointer, sizeof(nextPointer));
 		p += _blockSize;
 	}
 	((List*)p)->next = nullptr;
-	/*char* nextPointer = nullptr;
-	memcpy(p, &nextPointer, sizeof(nextPointer));*/
 	_free = _pool;
 }
