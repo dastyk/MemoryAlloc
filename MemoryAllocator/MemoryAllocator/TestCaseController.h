@@ -12,9 +12,12 @@
 
 #include "PoolAllocator.h"
 #include "StackAllocator.h"
+#include "PoolAllocatorLock.h"
+#include "StackAllocatorLock.h"
+
 
 #define NR_OF_TESTS 5000000
-#define NR_OF_THREADS 100
+#define NR_OF_THREADS 8
 
 class TestCaseC
 {
@@ -49,7 +52,10 @@ private:
 	Timer timer;
 
 	PoolAllocator* poolAllocator;
+	PoolAllocatorLock* poolAllocatorLock;
 	StackAllocator* stackAllocator;
+	StackAllocatorLock* stackAllocatorLock;
+
 
 };
 
@@ -130,7 +136,7 @@ void TestCaseC::TestPoolAllocator()
 		poolAllocator->Free(testCase[deleteOrder[i]]);
 	}
 	testCasePoolTime = timer.Elapsed().count();
-	std::cout << std::fixed << "Naive Test Case Performance: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance: " << testCasePoolTime << " ms" << std::endl;
+	std::cout << std::fixed << "Naive Test Case Performance: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance: " << testCasePoolTime << " ms" << std::endl << std::endl;
 	delete[] testCase;
 }
 
@@ -138,7 +144,7 @@ template <typename T>
 void TestCaseC::TestPoolAllocatorThreaded()
 {
 	srand(10);
-	poolAllocator = new PoolAllocator(sizeof(T), NR_OF_TESTS);
+	poolAllocatorLock = new PoolAllocatorLock(sizeof(T), NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
 	uint32_t *deleteOrder = new uint32_t[NR_OF_TESTS];
 	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
@@ -173,11 +179,11 @@ void TestCaseC::TestPoolAllocatorThreaded()
 	timer.Reset();
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
-		testCase[i] = (T*)poolAllocator->Malloc();
+		testCase[i] = (T*)poolAllocatorLock->Malloc();
 	}
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
-		poolAllocator->Free(testCase[deleteOrder[i]]);
+		poolAllocatorLock->Free(testCase[deleteOrder[i]]);
 	}
 	testCasePoolTime = timer.Elapsed().count();
 	std::cout << std::fixed << "Naive Test Case Performance single thread: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance single thread: " << testCasePoolTime << " ms" << std::endl;
@@ -189,6 +195,7 @@ void TestCaseC::TestPoolAllocatorThreaded()
 	testCasePoolTime = 0;
 	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
 	{
+		promises[i] = new std::promise<time>;
 		threads[i] = new std::thread([this, &promises, i] {this->ThreadPool<T>(NR_OF_TESTS / NR_OF_THREADS, *promises[i]);});
 	}
 	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
@@ -201,6 +208,8 @@ void TestCaseC::TestPoolAllocatorThreaded()
 		delete threads[i];
 		delete promises[i];
 	}
+
+	std::cout << std::fixed << "Naive Test Case Performance " << NR_OF_THREADS << " threads: " << ((float)testCaseNaiveTime)/NR_OF_THREADS << " ms" << std::endl << "Pool Test Case Performance " << NR_OF_THREADS << " threads: " << ((float)testCasePoolTime)/NR_OF_THREADS << " ms" << std::endl << std::endl;
 	delete[] threads;
 	delete[] promises;
 }
@@ -237,18 +246,18 @@ void TestCaseC::TestStackAllocator()
 	testCasePoolTime += timer.Elapsed().count();
 
 	delete[] testCase;
-	std::cout << std::fixed << "Naive Test Case Performance: " << testCaseNaiveTime << " ms" << std::endl << "Stack Test Case Performance: " << testCasePoolTime << " ms" << std::endl;
+	std::cout << std::fixed << "Naive Test Case Performance: " << testCaseNaiveTime << " ms" << std::endl << "Stack Test Case Performance: " << testCasePoolTime << " ms" << std::endl << std::endl;
 }
 
 template <typename T>
 void TestCaseC::TestStackAllocatorThreaded()
 {
-	stackAllocator = new StackAllocator(sizeof(T)*NR_OF_TESTS);
+	stackAllocatorLock = new StackAllocatorLock(sizeof(T)*NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
 
 
 	__int64 testCaseNaiveTime = 0;
-	__int64 testCasePoolTime = 0;
+	__int64 testCaseStackTime = 0;
 
 
 	timer.Reset();
@@ -264,16 +273,43 @@ void TestCaseC::TestStackAllocatorThreaded()
 
 	timer.Reset();
 
-	stackAllocator->Reset();
+	stackAllocatorLock->Reset();
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
-		testCase[i] = (T*)stackAllocator->Alloc(sizeof(T));
+		testCase[i] = (T*)stackAllocatorLock->Alloc(sizeof(T));
 	}
-	testCasePoolTime += timer.Elapsed().count();
+	testCaseStackTime += timer.Elapsed().count();
 
 	delete[] testCase;
-	std::cout << std::fixed << "Naive Test Case Performance single thread: " << testCaseNaiveTime << " ms" << std::endl << "Stack Test Case Performance single thread: " << testCasePoolTime << " ms" << std::endl;
+	std::cout << std::fixed << "Naive Test Case Performance single thread: " << testCaseNaiveTime << " ms" << std::endl << "Stack Test Case Performance single thread: " << testCaseStackTime << " ms" << std::endl;
 
+	std::promise<time> **promises = new std::promise<time>*[NR_OF_THREADS];
+	std::thread **threads = new std::thread*[NR_OF_THREADS];
+	testCaseNaiveTime = 0;
+	testCaseStackTime = 0;
+	stackAllocatorLock->Reset();
+	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
+	{
+		promises[i] = new std::promise<time>;
+		threads[i] = new std::thread([this, &promises, i] {this->ThreadStack<T>(NR_OF_TESTS / NR_OF_THREADS, *promises[i]);});
+	}
+	timer.Reset();
+	stackAllocatorLock->Reset();
+	testCaseStackTime += timer.Elapsed().count();
+	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
+	{
+		threads[i]->join();
+		auto f = promises[i]->get_future();
+		auto get = f.get();
+		testCaseNaiveTime += get.naive;
+		testCaseStackTime += get.our;
+		delete threads[i];
+		delete promises[i];
+	}
+
+	std::cout << std::fixed << "Naive Test Case Performance " << NR_OF_THREADS << " threads: " << ((float)testCaseNaiveTime)/NR_OF_THREADS << " ms" << std::endl << "Stack Test Case Performance " << NR_OF_THREADS << " threads: " << ((float)testCaseStackTime) / NR_OF_THREADS << " ms" << std::endl << std::endl;
+	delete[] threads;
+	delete[] promises;
 }
 
 template <typename T>
@@ -296,11 +332,11 @@ void TestCaseC::ThreadPool(uint32_t nrOfObjects, std::promise<time> &p)
 	temp.Reset();
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
-		testCase[i] = (T*)poolAllocator->Malloc();
+		testCase[i] = (T*)poolAllocatorLock->Malloc();
 	}
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
-		poolAllocator->Free(testCase[i]);
+		poolAllocatorLock->Free(testCase[i]);
 	}
 	returnTime.our += temp.Elapsed().count();
 
@@ -314,24 +350,21 @@ void TestCaseC::ThreadStack(uint32_t nrOfObjects, std::promise<time> &p)
 	T **testCase = new T*[nrOfObjects];
 
 	Timer temp(true);
-	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
-	{
+	for (uint32_t i = 0; i < nrOfObjects; i++)
+	{		
 		testCase[i] = new T();
 	}
-	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
+	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
 		delete testCase[i];
 	}
-	returnTime.naive += temp.Elapsed().count();
-
+	returnTime.naive = temp.Elapsed().count();
 	temp.Reset();
-
-	a.Reset();
-	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
+	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
-		testCase[i] = (T*)a.Alloc(sizeof(T));
+		testCase[i] = (T*)stackAllocatorLock->Alloc(sizeof(T));
 	}
-	returnTime.our += temp.Elapsed().count();
+	returnTime.our = temp.Elapsed().count();
 	p.set_value(returnTime);
 }
 
