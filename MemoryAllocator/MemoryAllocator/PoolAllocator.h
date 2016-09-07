@@ -10,16 +10,19 @@ private:
 	{
 		char* next;
 	};
+
 public:
 	PoolAllocator(char* poolStart, size_t blocksize, size_t numBlocks);
 	~PoolAllocator();
 
 	inline void* Malloc()
 	{
-		if (!_free) throw std::runtime_error("Pool allocator out of memory.");
-		
-		char* ret = _free; // Make copy for return.
-		_free = ((List*)_free)->next; // Copy the value that _free points to, to the variable _free.
+		if (!_freeBlockList) throw std::runtime_error("Pool allocator out of memory.");
+
+      // Set the next free block to be the second one in the list and return
+      // the original free block (effectively consuming the first block).
+		char* ret = _freeBlockList;
+      _freeBlockList = ((List*)_freeBlockList)->next;
 		
 		return ret;
 	}
@@ -27,10 +30,12 @@ public:
 	inline void Free(char*p)
 	{
 		if (!p) throw std::runtime_error("Free on nullptr");
-		
-		char* prev = _free; // Make copy of previous free block.
-      _free = p; // Free the given block and set it as next free block.	
-		((List*)_free)->next = prev; // Set the previous next free block as the next next free block.
+
+      // When freeing a block, we put it first in the list of empty blocks.
+      // To not sever the link we make it point to the previous head.
+		char* prev = _freeBlockList;
+      _freeBlockList = p;
+		((List*)_freeBlockList)->next = prev;
 	}  
 
 private:
@@ -38,7 +43,7 @@ private:
 
 private:
 	char* _pool;
-   char* _free;
+   char* _freeBlockList;
 	size_t _numBlocks;
 	size_t _blockSize;
 };

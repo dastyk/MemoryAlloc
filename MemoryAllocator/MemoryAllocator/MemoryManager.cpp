@@ -15,7 +15,7 @@ MemoryManager::~MemoryManager()
 PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects)
 {
 	_mutexLock.lock();
-	uint32_t alignment = (uint32_t)__max(8,powl(2,ceil(log2l((long double)sizeOfObject))));
+   uint32_t alignment = (uint32_t)__max(8, powl(2, ceil(log2l((long double)sizeOfObject))));
 	
 	char* rawAddress = reinterpret_cast<char*>(_free) + sizeof(PoolAllocator);
 	uint32_t mask = alignment - 1;
