@@ -28,7 +28,7 @@ public:
 		if (!p) throw std::runtime_error("Free on nullptr");
 		
 		uint32_t prev = _free; // Make copy of previous free block.
-      _free = p - _pool; // Free the given block and set it as next free block.	
+		_free = (uint32_t) (p - _pool); // Free the given block and set it as next free block.	
 		_GetAt(_free)->next = prev; // Set the previous next free block as the next next free block.
 		
 	}
