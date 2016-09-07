@@ -35,8 +35,8 @@ public:
 	PoolAllocator* CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects);
 	StackAllocator* CreateStackAllocator(uint32_t size);
 
-	void ReleasePoolAllocator(PoolAllocator* object);
-	void ReleaseStackAllocator(StackAllocator* object);
+	//void ReleasePoolAllocator(PoolAllocator* object);
+	//void ReleaseStackAllocator(StackAllocator* object);
 
 };
 

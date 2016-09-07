@@ -27,20 +27,21 @@ public:
 		__int64 our = 0;
 	};
 
+	//Performance Test
 	template <typename T>
-	void TestPoolAllocator();
+	void TestPerformancePoolAllocatorThreaded();
 	template <typename T>
-	void TestPoolAllocatorThreaded();
+	void ThreadPerformancePool(uint32_t nrOfObjects, std::promise<time> &p);
 	template <typename T>
-	void TestStackAllocator();
+	void TestPerformanceStackAllocatorThreaded();
 	template <typename T>
-	void TestStackAllocatorThreaded();
-	template <typename T>
-	void ThreadPool(uint32_t nrOfObjects, std::promise<time> &p);
-	template <typename T>
-	void ThreadStack(uint32_t nrOfObjects, std::promise<time> &p);
+	void ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> &p);
 
-
+	//"Realcase" test (T must be int for this)
+	void TestWriteIntPool();
+	void ThreadedWriteIntPool(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID);
+	void TestWriteIntStack();
+	void ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID);
 
 private:
 	int *randomNumbers;
@@ -85,59 +86,9 @@ TestCaseC::~TestCaseC()
 
 #pragma region TestCases
 
-template <typename T>
-void TestCaseC::TestPoolAllocator()
-{
-	srand(10);
-	
-	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS);
-	T **testCase = new T*[NR_OF_TESTS];
-	uint32_t *deleteOrder = new uint32_t[NR_OF_TESTS];
-	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
-	{
-		deleteOrder[i] = i;
-	}
-	uint32_t swapElement1, swapElement2, temp;
-	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
-	{
-		swapElement1 = rand() % NR_OF_TESTS;
-		swapElement2 = rand() % NR_OF_TESTS;
-
-		temp = deleteOrder[swapElement1];
-		deleteOrder[swapElement1] = deleteOrder[swapElement2];
-		deleteOrder[swapElement2] = temp;
-	}
-
-	__int64 testCaseNaiveTime = 0;
-	__int64 testCasePoolTime = 0;
-
-	timer.Reset();
-	for (int i = 0; i < NR_OF_TESTS; i++)
-	{
-		testCase[i] = new T();
-	}
-	for (int i = 0; i < NR_OF_TESTS; i++)
-	{
-		delete testCase[deleteOrder[i]];
-	}
-	testCaseNaiveTime = timer.Elapsed().count();
-
-	timer.Reset();
-	for (int i = 0; i < NR_OF_TESTS; i++)
-	{
-		testCase[i] = (T*)poolAllocator->Malloc();
-	}
-	for (int i = 0; i < NR_OF_TESTS; i++)
-	{
-		poolAllocator->Free((char*)testCase[deleteOrder[i]]);
-	}
-	testCasePoolTime = timer.Elapsed().count();
-	std::cout << std::fixed << "Naive Test Case Performance: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance: " << testCasePoolTime << " ms" << std::endl << std::endl;
-	delete[] testCase;
-}
 
 template <typename T>
-void TestCaseC::TestPoolAllocatorThreaded()
+void TestCaseC::TestPerformancePoolAllocatorThreaded()
 {
 	srand(10);
 	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS);
@@ -192,7 +143,7 @@ void TestCaseC::TestPoolAllocatorThreaded()
 	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
 	{
 		promises[i] = new std::promise<time>;
-		threads[i] = new std::thread([this, &promises, i] {this->ThreadPool<T>(NR_OF_TESTS / NR_OF_THREADS, *promises[i]);});
+		threads[i] = new std::thread([this, &promises, i] {this->ThreadPerformancePool<T>(NR_OF_TESTS / NR_OF_THREADS, *promises[i]);});
 	}
 	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
 	{
@@ -211,42 +162,7 @@ void TestCaseC::TestPoolAllocatorThreaded()
 }
 
 template <typename T>
-void TestCaseC::TestStackAllocator()
-{
-	StackAllocator* stackAllocator = _memoryManager->CreateStackAllocator(sizeof(T) * NR_OF_TESTS);
-	T **testCase = new T*[NR_OF_TESTS];
-
-
-	__int64 testCaseNaiveTime = 0;
-	__int64 testCasePoolTime = 0;
-
-
-	timer.Reset();
-	for (int i = 0; i < NR_OF_TESTS; i++)
-	{
-		testCase[i] = new T();
-	}
-	for (int i = 0; i < NR_OF_TESTS; i++)
-	{
-		delete testCase[i];
-	}
-	testCaseNaiveTime += timer.Elapsed().count();
-
-	timer.Reset();
-
-	stackAllocator->Reset();
-	for (int i = 0; i < NR_OF_TESTS; i++)
-	{
-		testCase[i] = (T*)stackAllocator->Alloc(sizeof(T));
-	}
-	testCasePoolTime += timer.Elapsed().count();
-
-	delete[] testCase;
-	std::cout << std::fixed << "Naive Test Case Performance: " << testCaseNaiveTime << " ms" << std::endl << "Stack Test Case Performance: " << testCasePoolTime << " ms" << std::endl << std::endl;
-}
-
-template <typename T>
-void TestCaseC::TestStackAllocatorThreaded()
+void TestCaseC::TestPerformanceStackAllocatorThreaded()
 {
 	StackAllocator* stackAllocatorLock = _memoryManager->CreateStackAllocator(sizeof(T) * NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
@@ -287,7 +203,7 @@ void TestCaseC::TestStackAllocatorThreaded()
 	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
 	{
 		promises[i] = new std::promise<time>;
-		threads[i] = new std::thread([this, &promises, i] {this->ThreadStack<T>(NR_OF_TESTS / NR_OF_THREADS, *promises[i]);});
+		threads[i] = new std::thread([this, &promises, i] {this->ThreadPerformanceStack<T>(NR_OF_TESTS / NR_OF_THREADS, *promises[i]);});
 	}
 	timer.Reset();
 	stackAllocatorLock->Reset();
@@ -309,7 +225,7 @@ void TestCaseC::TestStackAllocatorThreaded()
 }
 
 template <typename T>
-void TestCaseC::ThreadPool(uint32_t nrOfObjects, std::promise<time> &p)
+void TestCaseC::ThreadPerformancePool(uint32_t nrOfObjects, std::promise<time> &p)
 {
 	time returnTime;
 	T **testCase = new T*[nrOfObjects];
@@ -341,7 +257,7 @@ void TestCaseC::ThreadPool(uint32_t nrOfObjects, std::promise<time> &p)
 }
 
 template <typename T>
-void TestCaseC::ThreadStack(uint32_t nrOfObjects, std::promise<time> &p)
+void TestCaseC::ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> &p)
 {
 	time returnTime;
 	T **testCase = new T*[nrOfObjects];
@@ -364,6 +280,88 @@ void TestCaseC::ThreadStack(uint32_t nrOfObjects, std::promise<time> &p)
 	}
 	returnTime.our = temp.Elapsed().count();
 	p.set_value(returnTime);
+}
+
+void TestCaseC::TestWriteIntPool()
+{
+	srand(10);
+	uint32_t nrOfInts = 10;
+	std::promise<uint32_t**> **promises = new std::promise<uint32_t**>*[NR_OF_THREADS];
+	std::thread **threads = new std::thread*[NR_OF_THREADS];
+	
+	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
+	{
+		promises[i] = new std::promise<uint32_t**>;
+		threads[i] = new std::thread([this, &promises, i, nrOfInts] {this->ThreadedWriteIntPool(nrOfInts, *promises[i], i); });
+	}
+	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
+	{
+		threads[i]->join();
+		auto f = promises[i]->get_future();
+		auto get = f.get();
+		std::cout << "Thread ID: " << i << " writing out:" << std::endl;
+		for (uint32_t j = 0; j < nrOfInts; j++)
+		{
+			std::cout << *get[j] << std::endl;
+		}
+		delete threads[i];
+		delete promises[i];
+	}
+
+	delete[] threads;
+	delete[] promises;
+}
+void TestCaseC::ThreadedWriteIntPool(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID)
+{
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(uint32_t), nrOfObjects);
+	uint32_t** temp = new uint32_t*[nrOfObjects];
+	for (uint32_t i = 0; i < nrOfObjects; i++)
+	{
+		temp[i] = (uint32_t*)poolAllocator->Malloc();
+		*temp[i] = threadID;
+	}
+	p.set_value(temp);
+
+}
+void TestCaseC::TestWriteIntStack()
+{
+	srand(10);
+	uint32_t nrOfInts = 10;
+	std::promise<uint32_t**> **promises = new std::promise<uint32_t**>*[NR_OF_THREADS];
+	std::thread **threads = new std::thread*[NR_OF_THREADS];
+
+	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
+	{
+		promises[i] = new std::promise<uint32_t**>;
+		threads[i] = new std::thread([this, &promises, i, nrOfInts] {this->ThreadedWriteIntStack(nrOfInts, *promises[i], i); });
+	}
+	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
+	{
+		threads[i]->join();
+		auto f = promises[i]->get_future();
+		auto get = f.get();
+		std::cout << "Thread ID: " << i << " writing out:" << std::endl;
+		for (uint32_t j = 0; j < nrOfInts; j++)
+		{
+			std::cout << *get[j] << std::endl;
+		}
+		delete threads[i];
+		delete promises[i];
+	}
+
+	delete[] threads;
+	delete[] promises;
+}
+void TestCaseC::ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID)
+{
+	StackAllocator* stackAllocator = _memoryManager->CreateStackAllocator(sizeof(uint32_t)*nrOfObjects);
+	uint32_t** temp = new uint32_t*[nrOfObjects];
+	for (uint32_t i = 0; i < nrOfObjects; i++)
+	{
+		temp[i] = (uint32_t*)stackAllocator->Alloc(sizeof(uint32_t));
+		*temp[i] = threadID;
+	}
+	p.set_value(temp);
 }
 
 #pragma endregion
