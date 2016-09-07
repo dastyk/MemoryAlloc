@@ -20,9 +20,14 @@ public:
 
 
 	}
-	
+	//For reference: "Game Engine Architecture" 2nd Edition, page 211
+	//Note: Alignment must be a power of 2
 	inline void* AllocAligned(size_t size, uint32_t alignment)
 	{
+#ifdef _DEBUG
+		if (!(alignment != 0 && !(alignment & (alignment - 1))))
+			throw std::exception("Alignment in AllocAligned must be a power of 2");
+#endif
 		//Here's the code that is actually readable
 		/*
 		uint32_t mask = alignment - 1;
