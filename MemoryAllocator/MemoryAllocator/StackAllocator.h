@@ -5,7 +5,7 @@
 class StackAllocator
 {
 public:
-	StackAllocator(size_t stackSize);
+	StackAllocator(void* memoryLocation, size_t stackSize);
 	~StackAllocator();
 
 	inline void* Alloc(size_t size)
