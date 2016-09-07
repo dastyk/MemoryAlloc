@@ -1,4 +1,5 @@
 #include "MemoryManager.h"
+#include <iostream>
 
 MemoryManager::MemoryManager(size_t size)
 {
@@ -13,7 +14,7 @@ MemoryManager::~MemoryManager()
 
 PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects)
 {
-	size_t alignment = powl(2,ceil(log2l(sizeOfObject)));
+	size_t alignment = __max(8,powl(2,ceil(log2l(sizeOfObject))));
 	
 	char* rawAddress = reinterpret_cast<char*>(_free) + sizeof(PoolAllocator);
 	size_t mask = alignment - 1;

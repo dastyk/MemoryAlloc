@@ -29,7 +29,7 @@ int main()
 
 	a = 6;
 
-	std::cout << "i: " << i << std::endl << "a: " << a << std::endl;
+	std::cout << "i: " << *i << std::endl << "a: " << a << std::endl;
 	
 
 	system("pause");
