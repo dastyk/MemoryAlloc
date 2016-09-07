@@ -2,13 +2,13 @@
 
 
 
-StackAllocator::StackAllocator(size_t stackSize) : _stackSize(stackSize), _marker(0)
+StackAllocator::StackAllocator(void* memoryLocation, size_t stackSize) : _stack(memoryLocation), _stackSize(stackSize), _marker(0)
 {
-	_stack = operator new(stackSize);
+	
 }
 
 StackAllocator::~StackAllocator()
 {
-	operator delete(_stack);
+	
 }
 
