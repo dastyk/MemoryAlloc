@@ -11,26 +11,12 @@
 #include <chrono>       // std::chrono::system_clock
 int main()
 {
-	/*TestCaseC test;
+	TestCaseC test;
 
 	test.TestPoolAllocatorThreaded<Enemies>();
 	test.TestStackAllocatorThreaded<Enemies>();
 	test.TestPoolAllocator<Enemies>();
-	test.TestStackAllocator<Enemies>();*/
-
-
-	MemoryManager m(2U * 1024U * 1024U * 1024U);
-	PoolAllocator* pool = m.CreatePoolAllocator(sizeof(int), 1000000);
-
-	int* i = (int*)pool->Malloc();
-	*i = 5;
-
-	int& a = *(int*)pool->Malloc();
-
-	a = 6;
-
-	std::cout << "i: " << *i << std::endl << "a: " << a << std::endl;
-	
+	test.TestStackAllocator<Enemies>();
 
 	system("pause");
 	return 0;

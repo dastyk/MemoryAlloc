@@ -8,7 +8,7 @@ class PoolAllocator
 private:
 	struct List
 	{
-		char* next;
+		uint32_t next;
 	};
 public:
 	PoolAllocator(char* poolStart, size_t blocksize, size_t numBlocks);
@@ -16,29 +16,35 @@ public:
 
 	inline void* Malloc()
 	{
-		if (!_free) throw std::runtime_error("Pool allocator out of memory.");
+		if (_free == -1) throw std::runtime_error("Pool allocator out of memory.");
 		
-		char* ret = _free; // Make copy for return.
-		_free = ((List*)_free)->next; // Copy the value that _free points to, to the variable _free.
+		uint32_t ret = _free; // Make copy for return.
+		_free = _GetAt(_free)->next; // Copy the value that _free points to, to the variable _free.
 		
-		return ret;
+		return _pool + ret;
 	}
 	inline void Free(char*p)
 	{
 		if (!p) throw std::runtime_error("Free on nullptr");
 		
-		char* prev = _free; // Make copy of previous free block.
-		_free = p;// Free the given block and set it as next free block.
-		((List*)_free)->next = prev; // Set the previous next free block as the next next free block.
+		uint32_t prev = _free; // Make copy of previous free block.
+      _free = p - _pool; // Free the given block and set it as next free block.	
+		_GetAt(_free)->next = prev; // Set the previous next free block as the next next free block.
 		
 	}
+  
+  
 
 private:
+   inline List* _GetAt(uint32_t offset)
+   {
+      return (List*)(_pool + offset);
+   }
 	void _SetupFreeBlocks();
 
 private:
 	char* _pool;
-	char* _free;
+   uint32_t _free;
 	size_t _numBlocks;
 	size_t _blockSize;
 };
