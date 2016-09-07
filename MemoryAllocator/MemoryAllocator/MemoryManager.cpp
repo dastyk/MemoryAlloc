@@ -37,16 +37,14 @@ PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32
 StackAllocator * MemoryManager::CreateStackAllocator(uint32_t size)
 {
 	_mutexLock.lock();
-	
+	if (_remainingMemory < size + sizeof(StackAllocator))
+	{
+		throw std::exception("Not enough memory");
+	}
 
-
-
-
-
-
-
-
-	StackAllocator* stack = nullptr;
+	StackAllocator* stack = new(_free) StackAllocator(_free + sizeof(StackAllocator), size);
+	_remainingMemory -= sizeof(StackAllocator) + size;
+	_free += sizeof(StackAllocator) + size;
 	_mutexLock.unlock();
 	return stack;
 }

@@ -213,7 +213,7 @@ void TestCaseC::TestPoolAllocatorThreaded()
 template <typename T>
 void TestCaseC::TestStackAllocator()
 {
-	stackAllocator = new StackAllocator(sizeof(T)*NR_OF_TESTS);
+	StackAllocator* stackAllocator = _memoryManager->CreateStackAllocator(sizeof(T) * NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
 
 
@@ -248,7 +248,7 @@ void TestCaseC::TestStackAllocator()
 template <typename T>
 void TestCaseC::TestStackAllocatorThreaded()
 {
-	stackAllocatorLock = new StackAllocatorLock(sizeof(T)*NR_OF_TESTS);
+	StackAllocator* stackAllocatorLock = _memoryManager->CreateStackAllocator(sizeof(T) * NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
 
 
@@ -347,6 +347,7 @@ void TestCaseC::ThreadStack(uint32_t nrOfObjects, std::promise<time> &p)
 	T **testCase = new T*[nrOfObjects];
 
 	Timer temp(true);
+	StackAllocator* stackAllocator = _memoryManager->CreateStackAllocator(sizeof(T) * NR_OF_TESTS);
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{		
 		testCase[i] = new T();
@@ -359,7 +360,7 @@ void TestCaseC::ThreadStack(uint32_t nrOfObjects, std::promise<time> &p)
 	temp.Reset();
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
-		testCase[i] = (T*)stackAllocatorLock->Alloc(sizeof(T));
+		testCase[i] = (T*)stackAllocator->Alloc(sizeof(T));
 	}
 	returnTime.our = temp.Elapsed().count();
 	p.set_value(returnTime);
