@@ -10,10 +10,7 @@
 #include "Timer.h"
 
 
-#include "PoolAllocator.h"
-#include "StackAllocator.h"
-#include "PoolAllocatorLock.h"
-#include "StackAllocatorLock.h"
+#include "MemoryManager.h"
 
 
 #define NR_OF_TESTS 5000000
@@ -51,10 +48,7 @@ private:
 	int enemiesCreated;
 	Timer timer;
 
-	PoolAllocator* poolAllocator;
-	PoolAllocatorLock* poolAllocatorLock;
-	StackAllocator* stackAllocator;
-	StackAllocatorLock* stackAllocatorLock;
+
 
 
 };

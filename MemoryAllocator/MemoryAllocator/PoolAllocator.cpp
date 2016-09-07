@@ -1,9 +1,8 @@
 #include "PoolAllocator.h"
 
 
-PoolAllocator::PoolAllocator(size_t blocksize, size_t numBlocks) : _blockSize(blocksize), _numBlocks(numBlocks)
+PoolAllocator::PoolAllocator(char* poolStart, size_t blocksize, size_t numBlocks) : _blockSize(blocksize), _numBlocks(numBlocks), _pool(poolStart)
 {
-	_pool = operator new(_blockSize * _numBlocks);
 
 	_SetupFreeBlocks();
 }
@@ -11,13 +10,12 @@ PoolAllocator::PoolAllocator(size_t blocksize, size_t numBlocks) : _blockSize(bl
 
 PoolAllocator::~PoolAllocator()
 {
-	operator delete(_pool);
 }
 
 
 void PoolAllocator::_SetupFreeBlocks()
 {
-	char* p = reinterpret_cast<char*>(_pool);
+	char* p = _pool;
 
 	// Iterate through blocks (all are free at first) and set the first bytes
 	// to the pointer of the next block, thereby creating a linked list.
