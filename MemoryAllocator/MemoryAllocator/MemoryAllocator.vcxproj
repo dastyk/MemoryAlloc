@@ -19,20 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="PoolAllocator.h" />
-    <ClInclude Include="PoolAllocatorLock.h" />
     <ClInclude Include="StackAllocator.h" />
-    <ClInclude Include="StackAllocatorLock.h" />
     <ClInclude Include="TestCaseController.h" />
     <ClInclude Include="TestStructs.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="PoolAllocator.cpp" />
-    <ClCompile Include="PoolAllocatorLock.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
-    <ClCompile Include="StackAllocatorLock.cpp" />
     <ClCompile Include="TestCaseController.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
