@@ -9,7 +9,7 @@
 class MemoryManager
 {
 public:
-	MemoryManager(size_t size);
+	MemoryManager(uint32_t size);
 	~MemoryManager();
 private:
 	std::mutex _mutexLock;

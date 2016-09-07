@@ -31,7 +31,6 @@
     <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="PoolAllocator.cpp" />
     <ClCompile Include="StackAllocator.cpp" />
-    <ClCompile Include="TestCaseController.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9F72AA3A-80E6-4D4D-8B95-F28854D85EC2}</ProjectGuid>

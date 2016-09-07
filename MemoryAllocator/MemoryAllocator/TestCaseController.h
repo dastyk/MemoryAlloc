@@ -48,7 +48,7 @@ private:
 	int enemiesCreated;
 	Timer timer;
 
-
+	MemoryManager* _memoryManager;
 
 
 };
@@ -58,6 +58,7 @@ private:
 TestCaseC::TestCaseC()
 {
 	srand(10);
+	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	randomNumbers = new int[NR_OF_TESTS];
 	randomsEachFrame = new int[NR_OF_TESTS];
 	for (int i = 0; i < NR_OF_TESTS; i++)
@@ -88,7 +89,8 @@ template <typename T>
 void TestCaseC::TestPoolAllocator()
 {
 	srand(10);
-	poolAllocator = new PoolAllocator(sizeof(T), NR_OF_TESTS);
+	
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
 	uint32_t *deleteOrder = new uint32_t[NR_OF_TESTS];
 	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
@@ -127,7 +129,7 @@ void TestCaseC::TestPoolAllocator()
 	}
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
-		poolAllocator->Free(testCase[deleteOrder[i]]);
+		poolAllocator->Free((char*)testCase[deleteOrder[i]]);
 	}
 	testCasePoolTime = timer.Elapsed().count();
 	std::cout << std::fixed << "Naive Test Case Performance: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance: " << testCasePoolTime << " ms" << std::endl << std::endl;
@@ -138,7 +140,7 @@ template <typename T>
 void TestCaseC::TestPoolAllocatorThreaded()
 {
 	srand(10);
-	poolAllocatorLock = new PoolAllocatorLock(sizeof(T), NR_OF_TESTS);
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
 	uint32_t *deleteOrder = new uint32_t[NR_OF_TESTS];
 	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
@@ -173,11 +175,11 @@ void TestCaseC::TestPoolAllocatorThreaded()
 	timer.Reset();
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
-		testCase[i] = (T*)poolAllocatorLock->Malloc();
+		testCase[i] = (T*)poolAllocator->Malloc();
 	}
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
-		poolAllocatorLock->Free(testCase[deleteOrder[i]]);
+		poolAllocator->Free((char*)testCase[deleteOrder[i]]);
 	}
 	testCasePoolTime = timer.Elapsed().count();
 	std::cout << std::fixed << "Naive Test Case Performance single thread: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance single thread: " << testCasePoolTime << " ms" << std::endl;
@@ -324,13 +326,14 @@ void TestCaseC::ThreadPool(uint32_t nrOfObjects, std::promise<time> &p)
 	returnTime.naive += temp.Elapsed().count();
 
 	temp.Reset();
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), nrOfObjects);
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
-		testCase[i] = (T*)poolAllocatorLock->Malloc();
+		testCase[i] = (T*)poolAllocator->Malloc();
 	}
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
-		poolAllocatorLock->Free(testCase[i]);
+		poolAllocator->Free((char*)testCase[i]);
 	}
 	returnTime.our += temp.Elapsed().count();
 
