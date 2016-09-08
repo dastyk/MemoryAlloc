@@ -2,15 +2,14 @@
 
 int main()
 {
+	system("pause");
 	TestCaseC test;
 
    try
    {
-	   //FEL PÅ NAMNEN! HINNER INTE FIXA, FIXAR IMORGON // ANDREAS
-      /*test.TestPoolAllocatorThreaded<Enemies>();
-      test.TestStackAllocatorThreaded<Enemies>();
-      test.TestPoolAllocator<Enemies>();
-      test.TestStackAllocator<Enemies>();*/
+	  
+      test.TestPerformancePoolAllocatorThreaded<Enemies>();
+      test.TestPerformanceStackAllocatorThreaded<Enemies>();
 	  test.TestWriteIntStack();
    }
    catch (std::runtime_error& err)
