@@ -2,7 +2,6 @@
 
 int main()
 {
-	system("pause");
 	TestCaseC test;
 
    try
