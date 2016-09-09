@@ -22,6 +22,16 @@ class TestCaseC
 public:
 	TestCaseC();
 	~TestCaseC();
+
+	void CreateMemoryPool(uint32_t size)
+	{
+		_memoryManager = new MemoryManager(size);
+	}
+	void DeleteMemoryPool()
+	{
+		delete _memoryManager;
+	}
+
 	struct time
 	{
 		__int64 naive = 0;
@@ -414,7 +424,6 @@ void TestCaseC::ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_
 
 void TestCaseC::TestRWCachePool()
 {
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
 	PoolAllocator* pool = _memoryManager->CreatePoolAllocator(sizeof(Enemies), NR_OF_CACHE_TESTS);
 	Enemies* arr[NR_OF_CACHE_TESTS];
@@ -437,18 +446,16 @@ void TestCaseC::TestRWCachePool()
 		pool->Free((char*) arr[i]);
 	}
 
-	delete _memoryManager;
 }
 void TestCaseC::TestRWCacheStack()
 {
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
 	StackAllocator* stack = _memoryManager->CreateStackAllocator(sizeof(Enemies)*NR_OF_CACHE_TESTS);
 	Enemies* arr[NR_OF_CACHE_TESTS];
 
 	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
 	{
-		arr[i] = (Enemies*)stack->Alloc(sizeof(Enemies));
+		arr[i] = (Enemies*)stack->AllocAligned(sizeof(Enemies), (uint64_t)__max(8, powl(2, ceil(log2l(sizeof(Enemies))))));
 		arr[i]->Init();
 	}
 	for (int i = NR_OF_CACHE_TESTS - 1; i >= 0; i--)
@@ -459,11 +466,9 @@ void TestCaseC::TestRWCacheStack()
 	{
 		arr[i]->Tick();
 	}
-	delete _memoryManager;
 }
 void TestCaseC::TestRWCacheNaive()
 {
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
 	Enemies* arr[NR_OF_CACHE_TESTS];
 
@@ -484,7 +489,6 @@ void TestCaseC::TestRWCacheNaive()
 	{
 		delete arr[i];
 	}
-	delete _memoryManager;
 }
 
 
