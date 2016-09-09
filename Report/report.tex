@@ -16,10 +16,10 @@
 
 \setcounter{page}{1}
 
-problembeskrivning och föreslagen lösning, antaganden som inte nämnts i uppgiften, UML-diagram för minneshanterare och andra komponenter som använder den, grafer med exekveringstid för olika valda scenarion, sammanfattning som förklarar resultat och analyserar (i allmänhet) användning av minnesallokatorer i spelprojekt (t.ex förklarar vilka situationer i ett spel som gynnas av att använda varje typ av allokator)
+\textbf{\large problembeskrivning och föreslagen lösning, antaganden som inte nämnts i uppgiften, UML-diagram för minneshanterare och andra komponenter som använder den, grafer med exekveringstid för olika valda scenarion, sammanfattning som förklarar resultat och analyserar (i allmänhet) användning av minnesallokatorer i spelprojekt (t.ex förklarar vilka situationer i ett spel som gynnas av att använda varje typ av allokator)}
 
 \section{Memory manager}
-Beskrivning av minneshanterare, UML (som även visar hur tester använder den) osv
+\textbf{\large Beskrivning av minneshanterare, UML (som även visar hur tester använder den) osv}
 
 \section{Pool allocator}
 Sometimes, objects that need to be allocated are of the same (or similar) size, but may also be deallocated independently. For this usage a pool allocator is very suitable because it supports deallocating in an arbitrary order without fragmentation. This is because allocation is performed in chunks, which means that the size of an allocation is always the same and by extension an allocation will never fail provided that there is at least one free chunk in the pool.
@@ -66,17 +66,17 @@ Storing a number of blocks of a certain size is not enough -- we also need to ke
 
 Allocation and deallocation are very simple with the pool allocator and is performed in $O(1)$ complexity. Allocation is a matter of consuming a free block and making sure that the list of free blocks is properly updated. We do this by allocating the first free block and setting the head of the list to be the second free block. Similarly, deallocation is done by putting the returned block at the head of the list and connecting it to the previous head. See figures~\ref{fig:pool_allocation} and~\ref{fig:pool_deallocation} for details on how this is done.
 
-\textbf{två figurer som visar hur allokering och avallokering uppdaterar listan}
+\textbf{\large två figurer som visar hur allokering och avallokering uppdaterar listan}
 
 \section{Stack allocator}
-Beskrivning av stackallokatorn
+\textbf{\large Beskrivning av stackallokatorn}
 
 \section{Tests}
-Beskriver hur testerna fungerar och vad de gör, vad de mäter osv
+\textbf{\large Beskriver hur testerna fungerar och vad de gör, vad de mäter osv}
 
 \section{Results}
-Graferna med förklarande text. Vet inte vad mer som går in egentligen
+\textbf{\large Graferna med förklarande text. Vet inte vad mer som går in egentligen}
 
 \section{Conclusion}
-Förklara resultat, konstatera att minnesallokatorerna gör stor skillnad gentemot allokeringen som tillhandahålls av OS.
+\textbf{\large Förklara resultat, konstatera att minnesallokatorerna gör stor skillnad gentemot allokeringen som tillhandahålls av OS.}
 \end{document}
