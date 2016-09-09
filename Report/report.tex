@@ -21,11 +21,15 @@ problembeskrivning och föreslagen lösning, antaganden som inte nämnts i uppgi
 Beskrivning av minneshanterare, UML (som även visar hur tester använder den) osv
 
 \section{Pool allocator}
-Sometimes, objects that need to be allocated are of the same (or similar) size, but may also be deallocated independently. For this usage a pool allocator is very suitable.
+Sometimes, objects that need to be allocated are of the same (or similar) size, but may also be deallocated independently. For this usage a pool allocator is very suitable because it supports deallocating in an arbitrary order without fragmentation. This is because allocation is performed in chunks, which means that the size of an allocation is always the same and by extension an allocation will never fail provided that there is at least one free chunk in the pool.
 
-It works by storing a number of blocks of the desired size, keeping track of which ones are available to be allocated. Housekeeping is done using a linked list that uses the unallocated block for its data, see figure~\ref{fig:pool_free_blocks}. When allocating, an all-or-nothing approach is used in the sense that an entire block is allocated -- never parts of one. Of course, the user may choose to store less data in the given block, but the unused data is still considered to be allocated.
+Storing a number of blocks of a certain size is not enough -- we also need to keep track of which ones are available to be allocated. Our housekeeping is done using a linked list of chunks that uses the unallocated block for its data by storing a pointer to the next free block, see figure~\ref{fig:pool_free_blocks}. When allocating, an all-or-nothing approach is used in the sense that an entire block is allocated -- never parts of one. Of course, the user may choose to store less data in the given block, but the unused data is still considered to be allocated.
 
 \textbf{figur som visar idén med hur fria block underhålls}
+
+Allocation and deallocation are very simple with the pool allocator and is performed in $O(1)$ complexity. Allocation is a matter of consuming a free block and making sure that the list of free blocks is properly updated. We do this by allocating the first free block and setting the head of the list to be the second free block. Similarly, deallocation is done by putting the returned block at the head of the list and connecting it to the previous head. See figures~\ref{fig:pool_allocation} and~\ref{fig:pool_deallocation} for details on how this is done.
+
+\textbf{två figurer som visar hur allokering och avallokering uppdaterar listan}
 
 \section{Stack allocator}
 Beskrivning av stackallokatorn
