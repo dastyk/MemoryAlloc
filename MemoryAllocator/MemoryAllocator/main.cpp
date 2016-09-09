@@ -3,16 +3,28 @@
 int main()
 {
 	TestCaseC test;
-
+	system("pause");
    try
    {
-	   test.TestPerformanceStackAllocatorThreaded<Enemies>();
+	   switch (1)
+	   {
+	   case 1:
+		   test.TestRWCacheNaive();
+		  break;
+
+	   case 2:
+		   test.TestRWCachePool();
+		  break;
+
+	   case 3:
+		   test.TestRWCacheStack();
+		  break;
+	   }
    }
    catch (std::runtime_error& err)
    {
       std::cout << err.what() << std::endl;
    }
 
-	system("pause");
 	return 0;
 }

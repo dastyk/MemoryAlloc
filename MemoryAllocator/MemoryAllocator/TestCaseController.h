@@ -49,6 +49,11 @@ public:
 	void TestWriteIntStack();
 	void ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID);
 
+	//Read and Write test for Cache coherency
+	void TestRWCachePool();
+	void TestRWCacheStack();
+	void TestRWCacheNaive();
+
 
 private:
 	int *randomNumbers;
@@ -405,6 +410,83 @@ void TestCaseC::ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_
 	}
 	p.set_value(temp);
 }
+
+
+void TestCaseC::TestRWCachePool()
+{
+	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
+	srand(10);
+	PoolAllocator* pool = _memoryManager->CreatePoolAllocator(sizeof(Enemies), NR_OF_CACHE_TESTS);
+	Enemies* arr[NR_OF_CACHE_TESTS];
+
+	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
+	{
+		arr[i] = (Enemies*)pool->Malloc();
+		arr[i]->Init();
+	}
+	for (int i = NR_OF_CACHE_TESTS - 1; i >= 0; i--)
+	{
+		arr[i]->Tick();
+	}
+	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
+	{
+		arr[i]->Tick();
+	}
+	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
+	{
+		pool->Free((char*) arr[i]);
+	}
+
+	delete _memoryManager;
+}
+void TestCaseC::TestRWCacheStack()
+{
+	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
+	srand(10);
+	StackAllocator* stack = _memoryManager->CreateStackAllocator(sizeof(Enemies)*NR_OF_CACHE_TESTS);
+	Enemies* arr[NR_OF_CACHE_TESTS];
+
+	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
+	{
+		arr[i] = (Enemies*)stack->Alloc(sizeof(Enemies));
+		arr[i]->Init();
+	}
+	for (int i = NR_OF_CACHE_TESTS - 1; i >= 0; i--)
+	{
+		arr[i]->Tick();
+	}
+	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
+	{
+		arr[i]->Tick();
+	}
+	delete _memoryManager;
+}
+void TestCaseC::TestRWCacheNaive()
+{
+	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
+	srand(10);
+	Enemies* arr[NR_OF_CACHE_TESTS];
+
+	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
+	{
+		arr[i] = new Enemies;
+		arr[i]->Init();
+	}
+	for (int i = NR_OF_CACHE_TESTS - 1; i >= 0; i--)
+	{
+		arr[i]->Tick();
+	}
+	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
+	{
+		arr[i]->Tick();
+	}
+	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
+	{
+		delete arr[i];
+	}
+	delete _memoryManager;
+}
+
 
 #pragma endregion
 
