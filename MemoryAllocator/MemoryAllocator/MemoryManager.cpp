@@ -12,7 +12,7 @@ MemoryManager::~MemoryManager()
 	delete[] _memory;
 }
 
-PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects, uint8_t flag = POOL_ALLOCATOR_ALIGNED)
+PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects, uint8_t flag)
 {
 	if (flag & POOL_ALLOCATOR_ALIGNED)
 	{
