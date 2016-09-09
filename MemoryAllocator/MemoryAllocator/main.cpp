@@ -3,23 +3,27 @@
 int main()
 {
 	TestCaseC test;
-	system("pause");
    try
    {
-	   switch (1)
+	   test.CreateMemoryPool(2U * 1024U * 1024U * 1024U);
+	   for (int i = 0; i < 1000; i++)
 	   {
-	   case 1:
-		   test.TestRWCacheNaive();
-		  break;
+		   switch (1)
+		   {
+		   case 1:
+			   test.TestRWCacheNaive();
+			   break;
 
-	   case 2:
-		   test.TestRWCachePool();
-		  break;
+		   case 2:
+			   test.TestRWCachePool();
+			   break;
 
-	   case 3:
-		   test.TestRWCacheStack();
-		  break;
+		   case 3:
+			   test.TestRWCacheStack();
+			   break;
+		   }
 	   }
+	   test.DeleteMemoryPool();
    }
    catch (std::runtime_error& err)
    {
