@@ -6,9 +6,9 @@
 struct Enemies //"Object pool" test struct
 {
 	Enemies() { };
-	void Init() { HP = 10; damage = 0; timeToLive = rand() % 20000; };
+	void Init() { HP = 10; damage = 0; timeToLive = rand() % 20; };
 	void Tick() { timeToLive--; };
-	bool Alive() { return timeToLive ? true : false; };
+	bool Alive() { return (timeToLive ? true : false); };
 	int HP;
 	int timeToLive;
 	int damage;

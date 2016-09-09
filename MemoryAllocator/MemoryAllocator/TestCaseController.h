@@ -15,6 +15,7 @@
 
 #define NR_OF_TESTS 5000000
 #define NR_OF_THREADS 8
+#define NR_OF_CACHE_TESTS 10000
 
 class TestCaseC
 {
@@ -28,10 +29,15 @@ public:
 	};
 
 	//Performance Test
+
+	template <typename T>
+	void TestPerformancePoolAllocator();
 	template <typename T>
 	void TestPerformancePoolAllocatorThreaded();
 	template <typename T>
 	void ThreadPerformancePool(uint32_t nrOfObjects, std::promise<time> &p);
+	template <typename T>
+	void TestPerformanceStackAllocator();
 	template <typename T>
 	void TestPerformanceStackAllocatorThreaded();
 	template <typename T>
@@ -43,9 +49,6 @@ public:
 	void TestWriteIntStack();
 	void ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID);
 
-	//"Cache coherency", a lot of write and read to the "Enemies" struct
-	void TestCachePool();
-	void TestCacheNaive();
 
 private:
 	int *randomNumbers;
@@ -89,9 +92,8 @@ TestCaseC::~TestCaseC()
 
 #pragma region TestCases
 
-
 template <typename T>
-void TestCaseC::TestPerformancePoolAllocatorThreaded()
+void TestCaseC::TestPerformancePoolAllocator()
 {
 
 	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
@@ -140,6 +142,21 @@ void TestCaseC::TestPerformancePoolAllocatorThreaded()
 	testCasePoolTime = timer.Elapsed().count();
 	std::cout << std::fixed << "Naive Test Case Performance single thread: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance single thread: " << testCasePoolTime << " ms" << std::endl;
 	delete[] testCase;
+	delete _memoryManager;
+}
+
+template <typename T>
+void TestCaseC::TestPerformancePoolAllocatorThreaded()
+{
+
+	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
+	srand(10);
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS);
+	T **testCase = new T*[NR_OF_TESTS];
+	
+
+	__int64 testCaseNaiveTime = 0;
+	__int64 testCasePoolTime = 0;
 
 	std::promise<time> **promises = new std::promise<time>*[NR_OF_THREADS];
 	std::thread **threads = new std::thread*[NR_OF_THREADS];
@@ -167,10 +184,10 @@ void TestCaseC::TestPerformancePoolAllocatorThreaded()
 	delete _memoryManager;
 }
 
-template <typename T>
-void TestCaseC::TestPerformanceStackAllocatorThreaded()
-{
 
+template <typename T>
+void TestCaseC::TestPerformanceStackAllocator()
+{
 	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	StackAllocator* stackAllocatorLock = _memoryManager->CreateStackAllocator(sizeof(T) * NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
@@ -203,18 +220,29 @@ void TestCaseC::TestPerformanceStackAllocatorThreaded()
 	delete[] testCase;
 	std::cout << std::fixed << "Naive Test Case Performance single thread: " << testCaseNaiveTime << " ms" << std::endl << "Stack Test Case Performance single thread: " << testCaseStackTime << " ms" << std::endl;
 
+}
+
+template <typename T>
+void TestCaseC::TestPerformanceStackAllocatorThreaded()
+{
+
+	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
+	
+
+	__int64 testCaseNaiveTime = 0;
+	__int64 testCaseStackTime = 0;
+
 	std::promise<time> **promises = new std::promise<time>*[NR_OF_THREADS];
 	std::thread **threads = new std::thread*[NR_OF_THREADS];
 	testCaseNaiveTime = 0;
 	testCaseStackTime = 0;
-	stackAllocatorLock->Reset();
 	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
 	{
 		promises[i] = new std::promise<time>;
 		threads[i] = new std::thread([this, &promises, i] {this->ThreadPerformanceStack<T>(NR_OF_TESTS / NR_OF_THREADS, *promises[i]);});
 	}
 	timer.Reset();
-	stackAllocatorLock->Reset();
+	
 	testCaseStackTime += timer.Elapsed().count();
 	for (uint32_t i = 0; i < NR_OF_THREADS; i++)
 	{
@@ -376,40 +404,6 @@ void TestCaseC::ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_
 		*temp[i] = threadID;
 	}
 	p.set_value(temp);
-}
-
-void TestCaseC::TestCachePool()
-{
-	_memoryManager = new MemoryManager(2U*1024U*1024U);
-	Enemies* arr[10000];
-	PoolAllocator* enemyAllocator = _memoryManager->CreatePoolAllocator(sizeof(Enemies), 10000);
-	for (int i = 0; i < 10000; i++)
-	{
-		arr[i] = (Enemies*)enemyAllocator->Malloc();
-		arr[i]->Init();
-	}
-	bool alive = true;
-
-	while (alive)
-	{
-		alive = false;
-		for (int i = 0; i < 10000; i++)
-		{
-			if (arr[i]->Alive())
-			{
-				alive = true;
-				arr[i]->Tick();
-			}
-		}
-	}
-
-	std::cout << "DONE!" << std::endl;
-	delete _memoryManager;
-}
-
-void TestCaseC::TestCacheNaive()
-{
-
 }
 
 #pragma endregion

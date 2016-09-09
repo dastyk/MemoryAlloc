@@ -6,7 +6,7 @@ int main()
 
    try
    {
-	   test.TestCachePool();
+	   test.TestPerformanceStackAllocatorThreaded<Enemies>();
    }
    catch (std::runtime_error& err)
    {
