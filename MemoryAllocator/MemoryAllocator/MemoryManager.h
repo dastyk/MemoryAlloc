@@ -6,6 +6,9 @@
 #include <mutex>
 #include <map>
 
+#define POOL_ALLOCATOR_ALIGNED 1 << 0
+#define POOL_ALLOCATOR_UNALIGNED 1 << 1
+
 class MemoryManager
 {
 public:
@@ -20,7 +23,7 @@ private:
 
 public:
 
-	PoolAllocator* CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects);
+	PoolAllocator* CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects, uint8_t flag = POOL_ALLOCATOR_ALIGNED);
 	StackAllocator* CreateStackAllocator(uint64_t size);
 
 	//void ReleasePoolAllocator(PoolAllocator* object);
