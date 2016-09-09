@@ -21,7 +21,11 @@ problembeskrivning och föreslagen lösning, antaganden som inte nämnts i uppgi
 Beskrivning av minneshanterare, UML (som även visar hur tester använder den) osv
 
 \section{Pool allocator}
-Beskrivning av poolallokatorn
+Sometimes, objects that need to be allocated are of the same (or similar) size, but may also be deallocated independently. For this usage a pool allocator is very suitable.
+
+It works by storing a number of blocks of the desired size, keeping track of which ones are available to be allocated. Housekeeping is done using a linked list that uses the unallocated block for its data, see figure~\ref{fig:pool_free_blocks}. When allocating, an all-or-nothing approach is used in the sense that an entire block is allocated -- never parts of one. Of course, the user may choose to store less data in the given block, but the unused data is still considered to be allocated.
+
+\textbf{figur som visar idén med hur fria block underhålls}
 
 \section{Stack allocator}
 Beskrivning av stackallokatorn
