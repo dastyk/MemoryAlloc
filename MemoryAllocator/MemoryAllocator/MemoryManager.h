@@ -16,19 +16,7 @@ private:
 	char* _memory;
 	char* _free;
 
-	uint32_t _totalMemory;
-	uint32_t _remainingMemory;
-
-	struct UsedAllocatorStack
-	{
-		bool inUse = false;
-		uint32_t size = 0;
-		uint32_t blockSize = 0;
-		uint32_t objectSize = 0;
-		StackAllocator* stack;
-	};
-
-
+	uint64_t _remainingMemory;
 
 public:
 
