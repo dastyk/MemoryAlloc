@@ -36,7 +36,7 @@ private:
 	{
 		BlockInfo* freeBlock = _firstFree;
 		BlockInfo* previous = nullptr;
-		while (freeBlock->size < size && freeBlock->next != nullptr)
+		while (freeBlock->size < size + sizeof(BlockInfo) && freeBlock->next != nullptr)
 		{
 			previous = freeBlock;
 			freeBlock = freeBlock->next;
@@ -63,11 +63,11 @@ private:
 
 	inline void _Free(void* address, size_t size)
 	{
-		//Check if free block has any free "neighbours"
+		//Check if block to be freed has any free "neighbours"
 		BlockInfo* left = nullptr;
 		BlockInfo* right = nullptr;
 		BlockInfo* free = _firstFree;
-		while (free->next)
+		while (free)
 		{
 			if ((char*)free + free->size == address)
 				left = free;
@@ -80,6 +80,20 @@ private:
 			left->size += size + right->size;
 			if (left->next == right)
 				left->next = right->next;
+			if (right->next == left)
+			{
+				BlockInfo* b = _firstFree;
+				if (right == _firstFree)
+				{
+					_firstFree = left;
+				}
+				else
+				{
+					while (b->next && b->next != right)
+						b = b->next;
+					b->next = left;
+				}
+			}
 		}
 		else if (left)
 		{
@@ -89,7 +103,7 @@ private:
 		{
 			//Find which block points to "right" and adjust it
 			BlockInfo* b = _firstFree;
-			if (b == _firstFree)
+			if (right == _firstFree)
 			{
 				_firstFree = (BlockInfo*)((char*)_firstFree - size);
 				_firstFree->size = b->size + size;
@@ -101,8 +115,10 @@ private:
 				{
 					b = b->next;
 				}
-				b->next = right->next;
-				b->size = right->size + size;
+				b->next = (BlockInfo*)((char*)right - size);
+				b->next->next = right->next;
+				b->next->size = right->size + size;
+				
 			}
 		}
 		else
@@ -127,6 +143,9 @@ public:
 
 	void ReleasePoolAllocator(PoolAllocator* object);
 	void ReleaseStackAllocator(StackAllocator* object);
+
+	//DEBUG
+	void PrintBlockInfo();
 
 };
 
