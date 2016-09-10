@@ -36,7 +36,16 @@ public:
 		char* prev = _freeBlockList;
       _freeBlockList = p;
 		((List*)_freeBlockList)->next = prev;
-	}  
+	} 
+
+	inline size_t Size()
+	{
+		return _numBlocks * _blockSize;
+	}
+	inline size_t BlockSize()
+	{
+		return _blockSize;
+	}
 
 private:
 	void _SetupFreeBlocks();

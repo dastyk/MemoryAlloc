@@ -63,6 +63,11 @@ public:
 	{
 		return _marker;
 	}
+
+	inline size_t Size()
+	{
+		return _stackSize;
+	}
 	
 private:
 	size_t _stackSize;

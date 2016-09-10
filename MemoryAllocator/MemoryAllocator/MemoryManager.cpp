@@ -5,6 +5,9 @@ MemoryManager::MemoryManager(uint32_t size)
 {
 	_free = _memory = new char[size];
 	_remainingMemory = size;
+	_firstFree = (BlockInfo*)_free;
+	_firstFree->size = size;
+	_firstFree->next = nullptr;
 }
 
 MemoryManager::~MemoryManager()
@@ -31,6 +34,7 @@ PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32
 		_remainingMemory -= requirement;
 		char* alignedAddress = rawAddress + adjustment;
 		PoolAllocator* pool = new(_free) PoolAllocator(alignedAddress, alignment, nrOfObjects);
+		_allocatedBlocks[_free] = requirement;
 		_free += requirement;
 		_mutexLock.unlock();
 		return pool;
@@ -39,6 +43,7 @@ PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32
 	{
 		char* rawAdd = _free + sizeof(PoolAllocator);
 		PoolAllocator* pool = new(_free) PoolAllocator(rawAdd, sizeOfObject, nrOfObjects);
+		_allocatedBlocks[_free] = sizeof(PoolAllocator) + sizeOfObject * nrOfObjects;
 		_free = rawAdd + sizeOfObject*nrOfObjects;
 		return pool;
 	}
@@ -53,8 +58,21 @@ StackAllocator * MemoryManager::CreateStackAllocator(uint64_t size)
 	}
 
 	StackAllocator* stack = new(_free) StackAllocator(_free + sizeof(StackAllocator), size);
+	_allocatedBlocks[_free] = sizeof(StackAllocator) + size;
 	_remainingMemory -= sizeof(StackAllocator) + size;
 	_free += sizeof(StackAllocator) + size;
 	_mutexLock.unlock();
 	return stack;
+}
+
+void MemoryManager::ReleasePoolAllocator(PoolAllocator * object)
+{
+	_Free(object, _allocatedBlocks[(void*)object]);
+	_allocatedBlocks.erase(object);
+}
+
+void MemoryManager::ReleaseStackAllocator(StackAllocator * object)
+{
+	_Free(object, _allocatedBlocks[(void*)object]);
+	_allocatedBlocks.erase(object);
 }
