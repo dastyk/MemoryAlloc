@@ -32,7 +32,7 @@ private:
 
 	BlockInfo* _firstFree;
 
-	inline void* _Allocate(size_t size)
+	inline void* _Allocate(const size_t size)
 	{
 		BlockInfo* freeBlock = _firstFree;
 		BlockInfo* previous = nullptr;
@@ -61,7 +61,7 @@ private:
 		throw std::runtime_error("Out of memory");
 	}
 
-	inline void _Free(void* address, size_t size)
+	inline void _Free(void* address, const size_t size)
 	{
 		//Check if block to be freed has any free "neighbours"
 		BlockInfo* left = nullptr;
