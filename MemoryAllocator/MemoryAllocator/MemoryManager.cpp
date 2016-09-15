@@ -15,28 +15,41 @@ MemoryManager::~MemoryManager()
 	delete[] _memory;
 }
 
-PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects, uint8_t flag)
+// alignment is the desired alignment, i.e. blocks will start on a multiple of this.
+// For example, one might want to store structs of size 136 (perhaps two matrices
+// and two floats) with alignment 64 for the matrices. A value of zero means that
+// we don't care about alignment.
+PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects, uint32_t alignment)
 {
-	if (flag & POOL_ALLOCATOR_ALIGNED)
+	// Always use minimum size of 8 due to pointers in pool :/
+	if (sizeOfObject < 8)
+		sizeOfObject = 8;
+
+	if (alignment)
 	{
 		_mutexLock.lock();
-		uint64_t alignment = (uint64_t)__max(8, powl(2, ceil(log2l((long double)sizeOfObject))));
+
+		// Use a block size that is the smallest multiple of the desired alignment
+		// greater than or equal to the block size.
+		uint32_t effectiveBlockSize = sizeOfObject + (alignment - sizeOfObject % alignment);
 
 		//char* rawAddress = _free + sizeof(PoolAllocator);
-		char* rawAddress = (char*)_Allocate(alignment * nrOfObjects + sizeof(PoolAllocator) + alignment);
+		char* rawAddress = (char*)_Allocate(effectiveBlockSize * (nrOfObjects + 1) + sizeof(PoolAllocator));
 		uint64_t mask = alignment - 1;
 		uint64_t misalignment = mask & (size_t)rawAddress;
 		uint64_t adjustment = alignment - misalignment;
-		uint64_t requirement = alignment * nrOfObjects + sizeof(PoolAllocator) + alignment;
+		uint64_t requirement = effectiveBlockSize * (nrOfObjects + 1) + sizeof(PoolAllocator);
 		if (_remainingMemory < (requirement))
 		{
 			throw std::exception("Not enough memory");
 		}
 		_remainingMemory -= requirement;
 		char* alignedAddress = rawAddress + adjustment + sizeof(PoolAllocator);
-		PoolAllocator* pool = new(rawAddress) PoolAllocator(alignedAddress, alignment, nrOfObjects);
-		_allocatedBlocks[rawAddress] = alignment * nrOfObjects + sizeof(PoolAllocator) + alignment;
+		PoolAllocator* pool = new(rawAddress) PoolAllocator(alignedAddress, effectiveBlockSize, nrOfObjects);
+		_allocatedBlocks[rawAddress] = effectiveBlockSize * (nrOfObjects + 1) + sizeof(PoolAllocator);
+
 		_mutexLock.unlock();
+
 		return pool;
 	}
 	else

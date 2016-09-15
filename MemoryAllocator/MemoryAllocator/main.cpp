@@ -33,7 +33,7 @@ int main()
 	try
 	{
 		MemoryManager m(sizeof(int) * 16000);
-		PoolAllocator* pa1 = m.CreatePoolAllocator(sizeof(int), 10, 1);
+		PoolAllocator* pa1 = m.CreatePoolAllocator(sizeof(int), 10, 0);
 		m.PrintBlockInfo();
 		std::cout << std::endl;
 		StackAllocator* sa1 = m.CreateStackAllocator(3000);

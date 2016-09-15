@@ -138,7 +138,7 @@ private:
 
 public:
 
-	PoolAllocator* CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects, uint8_t flag = POOL_ALLOCATOR_ALIGNED);
+	PoolAllocator* CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects, uint32_t alignment);
 	StackAllocator* CreateStackAllocator(uint64_t size);
 
 	void ReleasePoolAllocator(PoolAllocator* object);

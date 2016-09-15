@@ -368,7 +368,7 @@ void TestCaseC::TestWriteIntPool()
 }
 void TestCaseC::ThreadedWriteIntPool(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID)
 {
-	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(uint32_t), nrOfObjects);
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(uint32_t), nrOfObjects, 0);
 	uint32_t** temp = new uint32_t*[nrOfObjects];
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
@@ -425,7 +425,7 @@ void TestCaseC::ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_
 void TestCaseC::TestRWCachePool()
 {
 	srand(10);
-	PoolAllocator* pool = _memoryManager->CreatePoolAllocator(sizeof(Enemies), NR_OF_CACHE_TESTS);
+	PoolAllocator* pool = _memoryManager->CreatePoolAllocator(sizeof(Enemies), NR_OF_CACHE_TESTS, 0);
 	Enemies* arr[NR_OF_CACHE_TESTS];
 
 	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
