@@ -113,7 +113,7 @@ void TestCaseC::TestPerformancePoolAllocator()
 
 	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
-	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS);
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS, 0);
 	T **testCase = new T*[NR_OF_TESTS];
 	uint32_t *deleteOrder = new uint32_t[NR_OF_TESTS];
 	for (uint32_t i = 0; i < NR_OF_TESTS; i++)
@@ -166,7 +166,7 @@ void TestCaseC::TestPerformancePoolAllocatorThreaded()
 
 	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
-	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS);
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS, 0);
 	T **testCase = new T*[NR_OF_TESTS];
 	
 
@@ -294,7 +294,7 @@ void TestCaseC::ThreadPerformancePool(uint32_t nrOfObjects, std::promise<time> &
 	returnTime.naive += temp.Elapsed().count();
 
 	temp.Reset();
-	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), nrOfObjects);
+	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), nrOfObjects, 0);
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
 		testCase[i] = (T*)poolAllocator->Malloc();

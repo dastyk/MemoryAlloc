@@ -8,7 +8,7 @@ int main()
 	   test.CreateMemoryPool(2U * 1024U * 1024U * 1024U);
 	   for (int i = 0; i < 1000; i++)
 	   {
-		   switch (3)
+		   switch (2)
 		   {
 		   case 1:
 			   test.TestRWCacheNaive();
