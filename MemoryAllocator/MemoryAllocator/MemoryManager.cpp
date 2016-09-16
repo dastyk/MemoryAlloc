@@ -31,7 +31,13 @@ PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32
 
 		// Use a block size that is the smallest multiple of the desired alignment
 		// greater than or equal to the block size.
-		uint32_t effectiveBlockSize = sizeOfObject + (alignment - sizeOfObject % alignment);
+		uint32_t trailing = sizeOfObject % alignment;
+		uint32_t effectiveBlockSize = sizeOfObject;
+		if (trailing != 0)
+		{
+			// Enlarge to next multiple of alignment
+			effectiveBlockSize += (alignment - trailing);
+		}
 
 		//char* rawAddress = _free + sizeof(PoolAllocator);
 		char* rawAddress = (char*)_Allocate(effectiveBlockSize * (nrOfObjects + 1) + sizeof(PoolAllocator));
