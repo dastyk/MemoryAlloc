@@ -60,9 +60,11 @@ PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32
 	}
 	else
 	{
+		_mutexLock.lock();
 		char* rawAdd = (char*)_Allocate(sizeOfObject * nrOfObjects + sizeof(PoolAllocator));
 		PoolAllocator* pool = new(rawAdd) PoolAllocator(rawAdd + sizeof(PoolAllocator), sizeOfObject, nrOfObjects);
 		_allocatedBlocks[rawAdd] = sizeof(PoolAllocator) + sizeOfObject * nrOfObjects;
+		_mutexLock.unlock();
 		return pool;
 	}
 }

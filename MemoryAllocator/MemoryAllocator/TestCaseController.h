@@ -34,8 +34,8 @@ public:
 
 	struct time
 	{
-		__int64 naive = 0;
-		__int64 our = 0;
+		uint64_t naive = 0;
+		uint64_t our = 0;
 	};
 
 	//Performance Test
@@ -131,8 +131,8 @@ void TestCaseC::TestPerformancePoolAllocator()
 		deleteOrder[swapElement2] = temp;
 	}
 
-	__int64 testCaseNaiveTime = 0;
-	__int64 testCasePoolTime = 0;
+	uint64_t testCaseNaiveTime = 0;
+	uint64_t testCasePoolTime = 0;
 
 	timer.Reset();
 	for (int i = 0; i < NR_OF_TESTS; i++)
@@ -170,8 +170,8 @@ void TestCaseC::TestPerformancePoolAllocatorThreaded()
 	T **testCase = new T*[NR_OF_TESTS];
 	
 
-	__int64 testCaseNaiveTime = 0;
-	__int64 testCasePoolTime = 0;
+	uint64_t testCaseNaiveTime = 0;
+	uint64_t testCasePoolTime = 0;
 
 	std::promise<time> **promises = new std::promise<time>*[NR_OF_THREADS];
 	std::thread **threads = new std::thread*[NR_OF_THREADS];
@@ -208,8 +208,8 @@ void TestCaseC::TestPerformanceStackAllocator()
 	T **testCase = new T*[NR_OF_TESTS];
 
 
-	__int64 testCaseNaiveTime = 0;
-	__int64 testCaseStackTime = 0;
+	uint64_t testCaseNaiveTime = 0;
+	uint64_t testCaseStackTime = 0;
 
 
 	timer.Reset();
@@ -244,8 +244,8 @@ void TestCaseC::TestPerformanceStackAllocatorThreaded()
 	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	
 
-	__int64 testCaseNaiveTime = 0;
-	__int64 testCaseStackTime = 0;
+	uint64_t testCaseNaiveTime = 0;
+	uint64_t testCaseStackTime = 0;
 
 	std::promise<time> **promises = new std::promise<time>*[NR_OF_THREADS];
 	std::thread **threads = new std::thread*[NR_OF_THREADS];
@@ -455,7 +455,7 @@ void TestCaseC::TestRWCacheStack()
 
 	for (int i = 0; i < NR_OF_CACHE_TESTS; i++)
 	{
-		arr[i] = (Enemies*)stack->AllocAligned(sizeof(Enemies), (uint64_t)__max(8, powl(2, ceil(log2l(sizeof(Enemies))))));
+		arr[i] = (Enemies*)stack->AllocAligned(sizeof(Enemies), (uint32_t)__max(8, powl(2, ceil(log2l(sizeof(Enemies))))));
 		arr[i]->Init();
 	}
 	for (int i = NR_OF_CACHE_TESTS - 1; i >= 0; i--)
