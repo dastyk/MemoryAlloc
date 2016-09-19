@@ -52,6 +52,10 @@ public:
 	void TestPerformanceStackAllocatorThreaded();
 	template <typename T>
 	void ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> &p);
+	template <typename T>
+	void TestRandomNewDeleteNaive();
+	template <typename T>
+	void TestRandomNewDeletePool(uint32_t allign);
 
 	//"Realcase" test (T must be int for this)
 	void TestWriteIntPool();
@@ -72,7 +76,7 @@ private:
 	Timer timer;
 
 	MemoryManager* _memoryManager;
-
+	
 
 };
 
@@ -489,6 +493,53 @@ void TestCaseC::TestRWCacheNaive()
 	{
 		delete arr[i];
 	}
+}
+
+
+template <typename T>
+void TestCaseC::TestRandomNewDeleteNaive()
+{
+	T **testData = new T*[NR_OF_TESTS];
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		testData[i] = new T;
+	}
+	for (int i = 0; i < NR_OF_TESTS/10; i++)
+	{
+		delete testData[randomsEachFrame[i]];
+	}
+	for (int i = NR_OF_TESTS / 10; i > 0; i--)
+	{
+		testData[randomsEachFrame[i]] = new T;
+	}
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		delete testData[i];
+	}
+}
+template <typename T>
+void TestCaseC::TestRandomNewDeletePool(uint32_t allign)
+{
+	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
+	PoolAllocator *testAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS, allign);
+	T **testData = new T*[NR_OF_TESTS];
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		testData[i] = (T*)testAllocator->Malloc();
+	}
+	for (int i = 0; i < NR_OF_TESTS / 10; i++)
+	{
+		testAllocator->Free((char*)testData[randomsEachFrame[i]]);
+	}
+	for (int i = NR_OF_TESTS / 10; i > 0; i--)
+	{
+		testData[randomsEachFrame[i]] = (T*)testAllocator->Malloc();
+	}
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		testAllocator->Free((char*)testData[i]);
+	}
+	delete _memoryManager;
 }
 
 

@@ -8,7 +8,7 @@ int main()
 	   test.CreateMemoryPool(2U * 1024U * 1024U * 1024U);
 	   for (int i = 0; i < 1000; i++)
 	   {
-		   switch (2)
+		   switch (5)
 		   {
 		   case 1:
 			   test.TestRWCacheNaive();
@@ -20,6 +20,14 @@ int main()
 
 		   case 3:
 			   test.TestRWCacheStack();
+			   break;
+
+		   case 4:
+			   test.TestRandomNewDeleteNaive<int>();
+			   break;
+
+		   case 5:
+			   test.TestRandomNewDeletePool<int>(0);
 			   break;
 		   }
 	   }
