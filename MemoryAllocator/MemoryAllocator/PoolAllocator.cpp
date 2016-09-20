@@ -27,11 +27,11 @@ void PoolAllocator::_SetupFreeBlocks()
 	char* p = _pool;
 	for (size_t i = 0; i < _numBlocks - 1; ++i)
 	{
-		((List*)p)->next = p + _blockSize;
+		((List*)p)->next = (i + 1) * _blockSize;
 		p += _blockSize;
 	}
 
    // The last block does not have a next free block, and this is indicated by
    // using a nullptr.
-   ((List*)p)->next = nullptr;
+   ((List*)p)->next = -1;
 }

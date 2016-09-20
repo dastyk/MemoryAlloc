@@ -5,7 +5,7 @@ int main()
 	TestCaseC test;
    try
    {
-	   test.CreateMemoryPool(2U * 1024U * 1024U * 1024U);
+	  // test.CreateMemoryPool(2U * 1024U * 1024U * 1024U);
 	   for (int i = 0; i < 1000; i++)
 	   {
 		   switch (2)
@@ -15,7 +15,7 @@ int main()
 			   break;
 
 		   case 2:
-			   test.TestRWCachePool();
+			   test.TestPerformancePoolAllocator<int>();
 			   break;
 
 		   case 3:
@@ -23,7 +23,7 @@ int main()
 			   break;
 		   }
 	   }
-	   test.DeleteMemoryPool();
+	   //test.DeleteMemoryPool();
    }
    catch (std::runtime_error& err)
    {
