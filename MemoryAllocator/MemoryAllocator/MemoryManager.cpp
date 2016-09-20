@@ -124,8 +124,8 @@ void MemoryManager::_Free(void * address, const size_t size)
 PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32_t nrOfObjects, uint32_t alignment)
 {
 	// Always use minimum size of 8 due to pointers in pool :/
-	if (sizeOfObject < 8)
-		sizeOfObject = 8;
+	if (sizeOfObject < 4)
+		sizeOfObject = 4;
 
 	if (alignment)
 	{
