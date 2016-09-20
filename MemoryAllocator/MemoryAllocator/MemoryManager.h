@@ -32,107 +32,11 @@ private:
 
 	BlockInfo* _firstFree;
 
-	inline void* _Allocate(const size_t size)
-	{
-		BlockInfo* freeBlock = _firstFree;
-		BlockInfo* previous = nullptr;
-		while (freeBlock->size < size + sizeof(BlockInfo) && freeBlock->next != nullptr)
-		{
-			previous = freeBlock;
-			freeBlock = freeBlock->next;
-		}
-		if (freeBlock->size > size + sizeof(BlockInfo))
-		{
-			if (freeBlock == _firstFree)
-			{
-				BlockInfo old = *_firstFree;
-				_firstFree = (BlockInfo*)((char*)_firstFree + size);
-				_firstFree->size = old.size - size;
-				_firstFree->next = old.next;
-			}
-			else
-			{
-				previous->next = (BlockInfo*)((char*)freeBlock + size);
-				previous->next->size = freeBlock->size - size;
-				previous->next->next = freeBlock->next;
-			}
-			return freeBlock;
-		}
-		throw std::runtime_error("Out of memory");
-	}
+	void* _Allocate(const size_t size);
+	
 
-	inline void _Free(void* address, const size_t size)
-	{
-		//Check if block to be freed has any free "neighbours"
-		BlockInfo* left = nullptr;
-		BlockInfo* right = nullptr;
-		BlockInfo* free = _firstFree;
-		while (free)
-		{
-			if ((char*)free + free->size == address)
-				left = free;
-			else if ((char*)free == (char*)address + size)
-				right = free;
-			free = free->next;
-		}
-		if (left && right)
-		{
-			left->size += size + right->size;
-			if (left->next == right)
-				left->next = right->next;
-			if (right->next == left)
-			{
-				BlockInfo* b = _firstFree;
-				if (right == _firstFree)
-				{
-					_firstFree = left;
-				}
-				else
-				{
-					while (b->next && b->next != right)
-						b = b->next;
-					b->next = left;
-				}
-			}
-		}
-		else if (left)
-		{
-			left->size += size;
-		}
-		else if (right)
-		{
-			//Find which block points to "right" and adjust it
-			BlockInfo* b = _firstFree;
-			if (right == _firstFree)
-			{
-				_firstFree = (BlockInfo*)((char*)_firstFree - size);
-				_firstFree->size = b->size + size;
-				_firstFree->next = b->next;
-			}
-			else
-			{
-				while (b->next && b->next != right)
-				{
-					b = b->next;
-				}
-				b->next = (BlockInfo*)((char*)right - size);
-				b->next->next = right->next;
-				b->next->size = right->size + size;
-				
-			}
-		}
-		else
-		{
-			//Find last free block and point it to this address
-			BlockInfo* here = (BlockInfo*)address;
-			here->next = nullptr;
-			here->size = size;
-			BlockInfo* iter = _firstFree;
-			while (iter->next != nullptr)
-				iter = iter->next;
-			iter->next = here;
-		}
-	}
+	void _Free(void* address, const size_t size);
+	
 
 
 
