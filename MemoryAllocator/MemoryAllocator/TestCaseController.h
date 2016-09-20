@@ -8,6 +8,7 @@
 #include <thread>
 #include <future>
 #include "Timer.h"
+#include <vector>
 
 
 #include "MemoryManager.h"
@@ -16,6 +17,14 @@
 #define NR_OF_TESTS 5000000
 #define NR_OF_THREADS 8
 #define NR_OF_CACHE_TESTS 10000
+
+struct matrix
+{
+	uint64_t a1 = 0, a2 = 0, a3 = 0, a4 = 0;
+	uint64_t b1 = 0, b2 = 0, b3 = 0, b4 = 0;
+	uint64_t c1 = 0, c2 = 0, c3 = 0, c4 = 0;
+	uint64_t d1 = 0, d2 = 0, d3 = 0, d4 = 0;
+};
 
 class TestCaseC
 {
@@ -53,9 +62,9 @@ public:
 	template <typename T>
 	void ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> &p);
 	template <typename T>
-	void TestRandomNewDeleteNaive();
+	uint64_t TestRandomNewDeleteNaive();
 	template <typename T>
-	void TestRandomNewDeletePool(uint32_t allign);
+	uint64_t TestRandomNewDeletePool(uint32_t allign);
 
 	//"Realcase" test (T must be int for this)
 	void TestWriteIntPool();
@@ -67,6 +76,17 @@ public:
 	void TestRWCachePool();
 	void TestRWCacheStack();
 	void TestRWCacheNaive();
+	void RandomizeTheRandom()
+	{
+		for (int i = 0; i < NR_OF_TESTS; i++)
+		{
+			int random1 = rand() % NR_OF_TESTS;
+			int random2 = rand() % NR_OF_TESTS;
+			int temp = randomsEachFrame[random1];
+			randomsEachFrame[random1] = randomsEachFrame[random2];
+			randomsEachFrame[random2] = temp;
+		}
+	}
 
 
 private:
@@ -87,13 +107,24 @@ TestCaseC::TestCaseC()
 	srand(10);
 	randomNumbers = new int[NR_OF_TESTS];
 	randomsEachFrame = new int[NR_OF_TESTS];
+	std::vector<int> usedNumbers;
+	
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
 		randomNumbers[i] = rand() % 20 + 1;
 	}
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
-		randomsEachFrame[i] = rand() % NR_OF_TESTS + 1;
+		randomsEachFrame[i] = i;
+		
+	}
+	for (int i = 0; i < NR_OF_TESTS; i++)
+	{
+		int random1 = rand() % NR_OF_TESTS;
+		int random2 = rand() % NR_OF_TESTS;
+		int temp = randomsEachFrame[random1];
+		randomsEachFrame[random1] = randomsEachFrame[random2];
+		randomsEachFrame[random2] = temp;
 	}
 
 	enemiesCreated = 0;
@@ -497,9 +528,10 @@ void TestCaseC::TestRWCacheNaive()
 
 
 template <typename T>
-void TestCaseC::TestRandomNewDeleteNaive()
+uint64_t TestCaseC::TestRandomNewDeleteNaive()
 {
 	T **testData = new T*[NR_OF_TESTS];
+	timer.Reset();
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
 		testData[i] = new T;
@@ -508,7 +540,7 @@ void TestCaseC::TestRandomNewDeleteNaive()
 	{
 		delete testData[randomsEachFrame[i]];
 	}
-	for (int i = NR_OF_TESTS / 10; i > 0; i--)
+	for (int i = (NR_OF_TESTS / 10)-1; i >= 0; i--)
 	{
 		testData[randomsEachFrame[i]] = new T;
 	}
@@ -516,13 +548,15 @@ void TestCaseC::TestRandomNewDeleteNaive()
 	{
 		delete testData[i];
 	}
+	delete[] testData;
+	return timer.Elapsed().count();
 }
 template <typename T>
-void TestCaseC::TestRandomNewDeletePool(uint32_t allign)
+uint64_t TestCaseC::TestRandomNewDeletePool(uint32_t allign)
 {
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	PoolAllocator *testAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS, allign);
 	T **testData = new T*[NR_OF_TESTS];
+	timer.Reset();
 	for (int i = 0; i < NR_OF_TESTS; i++)
 	{
 		testData[i] = (T*)testAllocator->Malloc();
@@ -539,7 +573,10 @@ void TestCaseC::TestRandomNewDeletePool(uint32_t allign)
 	{
 		testAllocator->Free((char*)testData[i]);
 	}
-	delete _memoryManager;
+	uint64_t totalTime = timer.Elapsed().count();
+	delete[] testData;
+	_memoryManager->ReleasePoolAllocator(testAllocator);
+	return totalTime;
 }
 
 
