@@ -8,7 +8,7 @@ class PoolAllocator
 private:
 	struct List
 	{
-		char* next;
+		int32_t next;
 	};
 
 public:
@@ -22,7 +22,10 @@ public:
       // Set the next free block to be the second one in the list and return
       // the original free block (effectively consuming the first block).
 		char* ret = _freeBlockList;
-      _freeBlockList = ((List*)_freeBlockList)->next;
+		if (((List*)_freeBlockList)->next >= 0)
+			_freeBlockList = _pool + ((List*)_freeBlockList)->next;
+		else
+			_freeBlockList = nullptr;
 		
 		return ret;
 	}
@@ -33,9 +36,17 @@ public:
 
       // When freeing a block, we put it first in the list of empty blocks.
       // To not sever the link we make it point to the previous head.
-		char* prev = _freeBlockList;
-      _freeBlockList = p;
-		((List*)_freeBlockList)->next = prev;
+		if (_freeBlockList)
+		{
+			char* prev = _freeBlockList;
+			_freeBlockList = p;
+			((List*)_freeBlockList)->next = prev - _pool;
+		}
+		else
+		{
+			_freeBlockList = p;
+			((List*)_freeBlockList)->next = -1;
+		}
 	} 
 
 	inline size_t Size()
