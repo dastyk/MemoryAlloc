@@ -46,7 +46,6 @@ int main()
 
 	   test.DeleteMemoryPool();
 
-	   system("pause");
    }
    catch (std::runtime_error& err)
    {
