@@ -149,7 +149,7 @@ PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32
 		uint64_t requirement = effectiveBlockSize * (nrOfObjects + 1) + sizeof(PoolAllocator);
 		if (_remainingMemory < (requirement))
 		{
-			throw std::exception("Not enough memory");
+			throw std::runtime_error("Not enough memory");
 		}
 		_remainingMemory -= requirement;
 		char* alignedAddress = rawAddress + adjustment + sizeof(PoolAllocator);
@@ -176,7 +176,7 @@ StackAllocator * MemoryManager::CreateStackAllocator(uint64_t size)
 	_mutexLock.lock();
 	if (_remainingMemory < size + sizeof(StackAllocator))
 	{
-		throw std::exception("Not enough memory");
+		throw std::runtime_error("Not enough memory");
 	}
 	char* rawAdd = (char*)_Allocate(size + sizeof(StackAllocator));
 	StackAllocator* stack = new(rawAdd) StackAllocator(rawAdd + sizeof(StackAllocator), size);

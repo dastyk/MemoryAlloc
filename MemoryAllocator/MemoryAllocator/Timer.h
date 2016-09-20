@@ -4,7 +4,8 @@
 //Timer taken from: https://www.daniweb.com/programming/software-development/code/445750/simple-timer-using-c-11-s-chrono-library
 
 #include <chrono>
-
+#include <string>
+#include <fstream>
 class Timer {
 	typedef std::chrono::high_resolution_clock high_resolution_clock;
 	typedef std::chrono::milliseconds milliseconds;

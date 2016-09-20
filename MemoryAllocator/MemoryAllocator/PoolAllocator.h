@@ -2,7 +2,7 @@
 #define POOL_ALLOCATOR_H
 #include <memory>
 #include <stdexcept>
-
+#include <string>
 class PoolAllocator
 {
 private:
@@ -26,7 +26,7 @@ public:
 			_freeBlockList = _pool + ((List*)_freeBlockList)->next;
 		else
 			_freeBlockList = nullptr;
-		
+
 		return ret;
 	}
 
@@ -47,7 +47,7 @@ public:
 			_freeBlockList = p;
 			((List*)_freeBlockList)->next = -1;
 		}
-	} 
+	}
 
 	inline size_t Size()
 	{
