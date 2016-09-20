@@ -8,7 +8,7 @@
 #include <fstream>
 class Timer {
 	typedef std::chrono::high_resolution_clock high_resolution_clock;
-	typedef std::chrono::microseconds milliseconds;
+	typedef std::chrono::microseconds microseconds;
 public:
 	explicit Timer(bool run = false)
 	{
@@ -19,9 +19,9 @@ public:
 	{
 		_start = high_resolution_clock::now();
 	}
-	milliseconds Elapsed() const
+	microseconds Elapsed() const
 	{
-		return std::chrono::duration_cast<milliseconds>(high_resolution_clock::now() - _start);
+		return std::chrono::duration_cast<microseconds>(high_resolution_clock::now() - _start);
 	}
 	template <typename T, typename Traits>
 	friend std::basic_ostream<T, Traits>& operator<<(std::basic_ostream<T, Traits>& out, const Timer& timer)

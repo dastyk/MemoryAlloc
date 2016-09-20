@@ -153,7 +153,7 @@ PoolAllocator * MemoryManager::CreatePoolAllocator(uint32_t sizeOfObject, uint32
 		}
 		_remainingMemory -= requirement;
 		char* alignedAddress = rawAddress + adjustment + sizeof(PoolAllocator);
-		std::cout << (void*)alignedAddress << std::endl;
+		
 		PoolAllocator* pool = new(rawAddress) PoolAllocator(alignedAddress, effectiveBlockSize, nrOfObjects);
 		_allocatedBlocks[rawAddress] = effectiveBlockSize * (nrOfObjects + 1) + sizeof(PoolAllocator);
 
