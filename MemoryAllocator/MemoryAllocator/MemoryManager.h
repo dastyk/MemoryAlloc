@@ -5,7 +5,7 @@
 #include "StackAllocator.h"
 #include <mutex>
 #include <map>
-
+#include <string>
 #define POOL_ALLOCATOR_ALIGNED 1 << 0
 #define POOL_ALLOCATOR_UNALIGNED 1 << 1
 
@@ -33,10 +33,10 @@ private:
 	BlockInfo* _firstFree;
 
 	void* _Allocate(const size_t size);
-	
+
 
 	void _Free(void* address, const size_t size);
-	
+
 
 
 

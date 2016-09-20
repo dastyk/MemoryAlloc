@@ -1,7 +1,7 @@
 #ifndef STACK_ALLOCATOR_H
 #define STACK_ALLOCATOR_H
 #include <stdexcept>
-
+#include <string>
 class StackAllocator
 {
 public:
@@ -68,7 +68,7 @@ public:
 	{
 		return _stackSize;
 	}
-	
+
 private:
 	size_t _stackSize;
 	size_t _marker;
