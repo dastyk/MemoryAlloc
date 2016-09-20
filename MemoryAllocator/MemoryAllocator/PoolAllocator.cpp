@@ -3,10 +3,7 @@
 
 PoolAllocator::PoolAllocator(char* poolStart, size_t blocksize, size_t numBlocks) : _blockSize(blocksize), _numBlocks(numBlocks), _pool(poolStart)
 {
-   if (blocksize < sizeof(_pool))
-   {
-      throw std::runtime_error("Block size must be larger than the size of a pointer!");
-   }
+
 
    // Sets up the free blocks to forms a linked list
 	_SetupFreeBlocks();
