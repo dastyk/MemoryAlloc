@@ -8,7 +8,7 @@
 #include <fstream>
 class Timer {
 	typedef std::chrono::high_resolution_clock high_resolution_clock;
-	typedef std::chrono::microseconds microseconds;
+	typedef std::chrono::milliseconds milliseconds;
 public:
 	explicit Timer(bool run = false)
 	{
