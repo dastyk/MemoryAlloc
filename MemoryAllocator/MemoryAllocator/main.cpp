@@ -6,6 +6,7 @@ int main()
 	TestCaseC test;
    try
    {
+	   std::cout << "DU LUKTAR KUK" << std::endl;
 	   test.CreateMemoryPool(2U * 1024U * 1024U * 1024U);
 	   test.TestPerformancePoolAllocator<matrix>();
 	   test.TestPerformancePoolAllocatorThreaded<matrix>();
