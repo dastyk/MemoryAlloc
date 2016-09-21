@@ -152,7 +152,6 @@ template <typename T>
 void TestCaseC::TestPerformancePoolAllocator()
 {
 
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
 	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS, 0);
 	T **testCase = new T*[NR_OF_TESTS];
@@ -198,16 +197,14 @@ void TestCaseC::TestPerformancePoolAllocator()
 	testCasePoolTime = timer.Elapsed().count();
 	std::cout << std::fixed << "Naive Test Case Performance single thread: " << testCaseNaiveTime << " ms" << std::endl << "Pool Test Case Performance single thread: " << testCasePoolTime << " ms" << std::endl;
 	delete[] testCase;
-	delete _memoryManager;
+	_memoryManager->ReleasePoolAllocator(poolAllocator);
 }
 
 template <typename T>
 void TestCaseC::TestPerformancePoolAllocatorThreaded()
 {
 
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
-	PoolAllocator* poolAllocator = _memoryManager->CreatePoolAllocator(sizeof(T), NR_OF_TESTS, 0);
 	T **testCase = new T*[NR_OF_TESTS];
 	
 
@@ -237,14 +234,12 @@ void TestCaseC::TestPerformancePoolAllocatorThreaded()
 	std::cout << std::fixed << "Naive Test Case Performance " << NR_OF_THREADS << " threads: " << ((float)testCaseNaiveTime)/NR_OF_THREADS << " ms" << std::endl << "Pool Test Case Performance " << NR_OF_THREADS << " threads: " << ((float)testCasePoolTime)/NR_OF_THREADS << " ms" << std::endl << std::endl;
 	delete[] threads;
 	delete[] promises;
-	delete _memoryManager;
 }
 
 
 template <typename T>
 void TestCaseC::TestPerformanceStackAllocator()
 {
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	StackAllocator* stackAllocatorLock = _memoryManager->CreateStackAllocator(sizeof(T) * NR_OF_TESTS);
 	T **testCase = new T*[NR_OF_TESTS];
 
@@ -275,16 +270,12 @@ void TestCaseC::TestPerformanceStackAllocator()
 
 	delete[] testCase;
 	std::cout << std::fixed << "Naive Test Case Performance single thread: " << testCaseNaiveTime << " ms" << std::endl << "Stack Test Case Performance single thread: " << testCaseStackTime << " ms" << std::endl;
-
+	_memoryManager->ReleaseStackAllocator(stackAllocatorLock);
 }
 
 template <typename T>
 void TestCaseC::TestPerformanceStackAllocatorThreaded()
 {
-
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
-	
-
 	uint64_t testCaseNaiveTime = 0;
 	uint64_t testCaseStackTime = 0;
 
@@ -314,7 +305,6 @@ void TestCaseC::TestPerformanceStackAllocatorThreaded()
 	std::cout << std::fixed << "Naive Test Case Performance " << NR_OF_THREADS << " threads: " << ((float)testCaseNaiveTime)/NR_OF_THREADS << " ms" << std::endl << "Stack Test Case Performance " << NR_OF_THREADS << " threads: " << ((float)testCaseStackTime) / NR_OF_THREADS << " ms" << std::endl << std::endl;
 	delete[] threads;
 	delete[] promises;
-	delete _memoryManager;
 }
 
 template <typename T>
@@ -347,6 +337,7 @@ void TestCaseC::ThreadPerformancePool(uint32_t nrOfObjects, std::promise<time> &
 	returnTime.our += temp.Elapsed().count();
 
 	p.set_value(returnTime);
+	_memoryManager->ReleasePoolAllocator(poolAllocator);
 }
 
 template <typename T>
@@ -356,7 +347,7 @@ void TestCaseC::ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> 
 	T **testCase = new T*[nrOfObjects];
 
 	Timer temp(true);
-	StackAllocator* stackAllocator = _memoryManager->CreateStackAllocator(sizeof(T) * NR_OF_TESTS);
+	StackAllocator* stackAllocator = _memoryManager->CreateStackAllocator(sizeof(T) * nrOfObjects);
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{		
 		testCase[i] = new T();
@@ -373,12 +364,11 @@ void TestCaseC::ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> 
 	}
 	returnTime.our = temp.Elapsed().count();
 	p.set_value(returnTime);
+	_memoryManager->ReleaseStackAllocator(stackAllocator);
 }
 
 void TestCaseC::TestWriteIntPool()
 {
-
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
 	uint32_t nrOfInts = 10;
 	std::promise<uint32_t**> **promises = new std::promise<uint32_t**>*[NR_OF_THREADS];
@@ -405,7 +395,6 @@ void TestCaseC::TestWriteIntPool()
 
 	delete[] threads;
 	delete[] promises;
-	delete _memoryManager;
 }
 void TestCaseC::ThreadedWriteIntPool(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID)
 {
@@ -417,11 +406,10 @@ void TestCaseC::ThreadedWriteIntPool(uint32_t nrOfObjects, std::promise<uint32_t
 		*temp[i] = threadID;
 	}
 	p.set_value(temp);
-
+	_memoryManager->ReleasePoolAllocator(poolAllocator);
 }
 void TestCaseC::TestWriteIntStack()
 {
-	_memoryManager = new MemoryManager(2U * 1024U * 1024U * 1024U);
 	srand(10);
 	uint32_t nrOfInts = 10;
 	std::promise<uint32_t**> **promises = new std::promise<uint32_t**>*[NR_OF_THREADS];
@@ -448,7 +436,6 @@ void TestCaseC::TestWriteIntStack()
 
 	delete[] threads;
 	delete[] promises;
-	delete _memoryManager;
 }
 void TestCaseC::ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_t**> &p, uint32_t threadID)
 {
@@ -460,6 +447,7 @@ void TestCaseC::ThreadedWriteIntStack(uint32_t nrOfObjects, std::promise<uint32_
 		*temp[i] = threadID;
 	}
 	p.set_value(temp);
+	_memoryManager->ReleaseStackAllocator(stackAllocator);
 }
 
 
@@ -486,6 +474,7 @@ void TestCaseC::TestRWCachePool()
 	{
 		pool->Free((char*) arr[i]);
 	}
+	_memoryManager->ReleasePoolAllocator(pool);
 
 }
 void TestCaseC::TestRWCacheStack()
@@ -507,6 +496,7 @@ void TestCaseC::TestRWCacheStack()
 	{
 		arr[i]->Tick();
 	}
+	_memoryManager->ReleaseStackAllocator(stack);
 }
 void TestCaseC::TestRWCacheNaive()
 {
