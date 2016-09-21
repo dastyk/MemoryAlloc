@@ -317,6 +317,7 @@ void TestCaseC::ThreadPerformancePool(uint32_t nrOfObjects, std::promise<time> &
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
 		testCase[i] = new T();
+		memset(testCase[i], 0, sizeof(T));
 	}
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
@@ -329,6 +330,7 @@ void TestCaseC::ThreadPerformancePool(uint32_t nrOfObjects, std::promise<time> &
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
 		testCase[i] = (T*)poolAllocator->Malloc();
+		memset(testCase[i], 0, sizeof(T));
 	}
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
@@ -351,6 +353,7 @@ void TestCaseC::ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> 
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{		
 		testCase[i] = new T();
+		memset(testCase[i], 0, sizeof(T));
 	}
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
@@ -361,6 +364,7 @@ void TestCaseC::ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> 
 	for (uint32_t i = 0; i < nrOfObjects; i++)
 	{
 		testCase[i] = (T*)stackAllocator->Alloc(sizeof(T));
+		memset(testCase[i], 0, sizeof(T));
 	}
 	returnTime.our = temp.Elapsed().count();
 	p.set_value(returnTime);
