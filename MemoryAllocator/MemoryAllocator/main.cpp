@@ -6,45 +6,16 @@ int main()
 	TestCaseC test;
    try
    {
-	   test.CreateMemoryPool(10U * 1024U * 1024U * 1024U);
-	   uint64_t timer1 = 0;
-	   uint64_t timer2 = 0;
-	   std::cout << "Testing with uint64_t of size: " << sizeof(uint64_t) << std::endl;
+	   test.CreateMemoryPool(2U * 1024U * 1024U * 1024U);
+	   std::cout << "Size: " << sizeof(matrix2) << std::endl;
+	   uint64_t timer1 = 0, timer2 = 0;
 	   for (int i = 0; i < NR_OF_LOOPS; i++)
 	   {
 		   test.RandomizeTheRandom();
-		   timer1 += test.TestRandomNewDeleteNaive<uint32_t>();
-		   timer2 += test.TestRandomNewDeletePool<uint32_t>(0);
+		   timer1 += test.TestRandomNewDeleteNaive<matrix2>();
+		   timer2 += test.TestRandomNewDeletePool<matrix2>(0);
 	   }
-	   
-	   std::cout << "Test Case: Random new and delete. Testing: Naive Solution." << std::endl << "Time for " << NR_OF_TESTS << " objects, 10% deleted and recreated: " << std::endl;
-	   std::cout << timer1 / NR_OF_LOOPS << std::endl;
-
-	   
-
-	   std::cout << "Test Case: Random new and delete. Testing: Pool Solution." << std::endl << "Time for " << NR_OF_TESTS << " objects, 10% deleted and recreated: " << std::endl;
-	   std::cout << timer2 / NR_OF_LOOPS << std::endl;
-
-
-	   std::cout << std::endl << "Testing with a matrix of size " << sizeof(matrix) << std::endl;
-	   timer1 = 0;
-	   timer2 = 0;
-	   for (int i = 0; i < NR_OF_LOOPS; i++)
-	   {
-		   test.RandomizeTheRandom();
-		   timer1 += test.TestRandomNewDeleteNaive<matrix>();
-		   timer2 += test.TestRandomNewDeletePool<matrix>(0);
-	   }
-
-	   std::cout << "Test Case: Random new and delete. Testing: Naive Solution." << std::endl << "Time for " << NR_OF_TESTS << " objects, 10% deleted and recreated: " << std::endl;
-	   std::cout << timer1 / NR_OF_LOOPS << std::endl;
-
-
-
-	   std::cout << "Test Case: Random new and delete. Testing: Pool Solution." << std::endl << "Time for " << NR_OF_TESTS << " objects, 10% deleted and recreated: " << std::endl;
-	   std::cout << timer2 / NR_OF_LOOPS << std::endl;
-
-	   test.DeleteMemoryPool();
+	   std::cout << "OS Method: " << 1.0f*timer1 / NR_OF_LOOPS << std::endl << "Pool method: " << 1.0f*timer2 / NR_OF_LOOPS << std::endl;
 
    }
    catch (std::runtime_error& err)
