@@ -1,9 +1,13 @@
 #include "MemoryManager.h"
 #include <iostream>
+#include <string.h>
 
 MemoryManager::MemoryManager(uint32_t size)
 {
+
 	_free = _memory = new char[size];
+	memset(_free, 0, size);
+	
 	_remainingMemory = size;
 	_firstFree = (BlockInfo*)_free;
 	_firstFree->size = size;

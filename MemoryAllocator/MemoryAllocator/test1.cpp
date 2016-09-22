@@ -79,7 +79,7 @@ struct TS
 {
   Matrix a;
   Matrix b;
- // Matrix c;
+  Matrix c;
 };
 
 int main(int argc, char* argv[])
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
       t.Reset();
       for(uint32_t i = 0; i < size; i++)
       {
-        tot = ts[i]->a + ts[i]->b;
+        ts[i]->c = ts[i]->a + ts[i]->b;
       }
 
       times[k] += t.Elapsed().count();
