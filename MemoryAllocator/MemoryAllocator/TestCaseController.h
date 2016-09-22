@@ -311,6 +311,8 @@ template <typename T>
 void TestCaseC::ThreadPerformancePool(uint32_t nrOfObjects, std::promise<time> &p)
 {
 	time returnTime;
+	returnTime.naive = 0;
+	returnTime.our = 0;
 	T **testCase = new T*[nrOfObjects];
 	
 	Timer temp(true);
@@ -346,6 +348,8 @@ template <typename T>
 void TestCaseC::ThreadPerformanceStack(uint32_t nrOfObjects, std::promise<time> &p)
 {
 	time returnTime;
+	returnTime.naive = 0;
+	returnTime.our = 0;
 	T **testCase = new T*[nrOfObjects];
 
 	Timer temp(true);
